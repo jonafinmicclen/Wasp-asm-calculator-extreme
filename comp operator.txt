@@ -1,0 +1,4 @@
+
+// find operator
+COMP OPERATOR, '+'
+JEQ ADDVALUES

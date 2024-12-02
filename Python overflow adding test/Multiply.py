@@ -5,8 +5,12 @@ import random
 a = np.uint16(random.randint(0, 0xFFFF))
 b = np.uint16(random.randint(0, 0xFFFF))
 
-a = 0xFFFF
-b = 0xFFFF
+a = 0xAAAA
+b = 0x1111
+
+r1, r2 = Addition.add(a, b)
+print(f'r1: {hex(r1)}, r2: {hex(r2)}')
+exit()
 
 a0 = a >> 8
 a1 = a - (a0 << 8)

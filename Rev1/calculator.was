@@ -10,16 +10,54 @@ MOV [OPERATOR], AX
 
 // MAIN START
 
-MOV AX, 0xABCD
-MOV BX, 0x0000
+MOV AX, 0xFFFF
+MOV BX, 0xFFFF
 
-CALL splitlast
+CALL hexadd
 
-// MAIN END
 
 HALT
 
+// MAIN END
+
+
 // FUNCTIONS
+// FUNCTION START
+hexadd:
+
+MOV [TEMP1], BX
+
+CALL splitvalue
+
+MOV [AN00], AX
+MOV [AN01], BX
+
+MOV AX, [TEMP1]
+
+CALL splitvalue
+
+MOV [BN00], AX
+MOV [BN01], BX
+
+MOV AX, [AN01]
+ADD AX, BX
+
+CALL splitvalue
+
+MOV [TEMP1], BX
+
+MOV BX, [AN00]
+ADD AX, BX
+MOV BX, [BN00]
+ADD AX, BX
+
+MOV BX, [TEMP1]
+
+RET
+
+// hexadd END
+
+
 
 // FUNCTION START
 splitvalue:
@@ -109,3 +147,8 @@ TEMP3: DC.W 0x1FE9
 
 AXCOPY: DC.W 0x1FE8
 BXCOPY: DC.W 0x1FE7
+
+AN00: DC.W 0x1FE6
+AN01: DC.W 0x1FE5
+BN00: DC.W 0x1FE4
+BN01: DC.W 0x1FE3
