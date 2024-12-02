@@ -1,6 +1,6 @@
 // MAIN START
 
-MOV AX, 0x000A
+MOV AX, 0x000F
 MOV BX, DIGIT1
 
 CALL distributeintodigit
@@ -14,7 +14,7 @@ HALT
 
 // FUNCTION START
 distributeintodigit:
-// BX must contain address of target digit
+// BX must contain address of address of target digit
 // AX must contain value to distribute
 
 MOV [TEMP3], BX
@@ -26,13 +26,14 @@ CMP BX, 0x0A
 JL compareAintodigit
 
 INC AX
-SUB BX, 0x10
+SUB BX, 0xA
 
 compareAintodigit:
 
 MOV [TEMP4], AX
 
 MOV AX, [TEMP3]
+MOV AX, [AX]
 MOV [AX], BX
 
 MOV AX, [TEMP4]
@@ -40,6 +41,8 @@ MOV AX, [TEMP4]
 RET
 // remainder is in AX
 // distributeintodigit END
+
+
 
 // FUNCTION START
 hexmulitply:
