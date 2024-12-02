@@ -2,3 +2,10 @@
 // find operator
 COMP OPERATOR, '+'
 JEQ ADDVALUES
+
+@37
+// IF last digit more than 9 then
+// rest of number += 1
+// ELSE DO NOTHING
+// get last digit - 10 = the n'th DECIMAL
+// IF the last digit is a letter the remaider should be +=1 and the digit it the letter -10 if not then do nothing with rest

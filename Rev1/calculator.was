@@ -8,13 +8,14 @@ MOV [VALUEB], AX
 MOV AX, '+'
 MOV [OPERATOR], AX
 
+
+
 // MAIN START
 
-MOV AX, 0xAAAA
-MOV BX, 0X1111
+MOV AX, 0x000A
+MOV BX, DIGIT1
 
-CALL hexmulitply
-
+CALL distributeintodigit
 
 HALT
 
@@ -22,24 +23,30 @@ HALT
 
 
 // FUNCTIONS
+
 // FUNCTION START
 distributeintodigit:
 // BX must contain address of target digit
 // AX must contain value to distribute
 
 MOV [TEMP3], BX
-// TEMP 3 is ptr to digit ptr so will need [[]]
+// TEMP 3 is ptr to digit ptr
 
 CALL splitlast
 
-// IF last digit more than 9 then
-// rest of number += 1
-// ELSE DO NOTHING
-// get last digit - 10 = the n'th DECIMAL
-// IF the last digit is a letter the remaider should be +=1 and the digit it the letter -10 if not then do nothing with rest
+CMP BX, 0x0A
+JL compareAintodigit
+INC AX
+SUB BX, 0x9
+compareAintodigit:
 
+MOV [TEMP4], AX
+MOV AX, [TEMP3]
+MOV [AX], BX
+MOV AX, [TEMP4]
 
 RET
+// remainder is in AX
 // distributeintodigit END
 
 // FUNCTION START
@@ -213,3 +220,5 @@ AN00: DC.W 0x1FE6
 AN01: DC.W 0x1FE5
 BN00: DC.W 0x1FE4
 BN01: DC.W 0x1FE3
+
+TEMP4: DC.W 0x1FE2
