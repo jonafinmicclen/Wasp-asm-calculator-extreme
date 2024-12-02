@@ -8,25 +8,34 @@ MOV [VALUEB], AX
 MOV AX, '+'
 MOV [OPERATOR], AX
 
-// code
+// MAIN START
 
-// find operator
-COMP OPERATOR, '+'
-JEQ ADDVALUES
+MOV AX, 0xABCD
+MOV BX, 0x0000
+
+CALL splitvalue
+
+// MAIN END
+
 HALT
 
-// operation code
-ADDVALUES:
-MOV AX, [VALUEA]
-MOV BX, [VALUEB]
+// FUNCTIONS
 
-// functions use AX and BX as arg1 and arg2 and return 1 and return 2 unless more neeeded then use extra from memory
+
 
 // FUNCTION START
 splitvalue:
 
 MOV BX, AX
-LBBX
+
+//BX
+MOV [AXCOPY], AX
+MOV AX, 0x00FF
+AND BX, AX
+MOV AX, [AXCOPY]
+// WASP SHR BUG FIX END
+
+//AX
 SUB AX, BX
 QSR AX
 QSR AX
@@ -36,12 +45,14 @@ MOV [BXCOPY], BX
 MOV BX, 0x00FF
 AND AX, BX
 MOV BX, [BXCOPY]
-// WASP SHR BUG FIX ENDMOV BX, [BXCOPY]
+// WASP SHR BUG FIX END
 
 RET
 
-// Result, AX contains Highbyte, BX contains 
+// Result, AX contains 0x**00 >> 8, BX contains 0x00** 
 // splitvalue END
+
+
 
 // FUNCTION START
 splitlast:
@@ -51,21 +62,28 @@ LBBX
 QSR BX
 
 // WASP SHR BUG FIX START
+MOV [AXCOPY], AX
+MOV AX, 0x0FFF
+AND BX, AX
+MOV AX, [AXCOPY]
+// WASP SHR BUG FIX END
+
+SUB AX, BX
+SHR BX
+
+// WASP SHR BUG FIX START
 MOV [BXCOPY], BX
 MOV BX, 0x0FFF
 AND AX, BX
 MOV BX, [BXCOPY]
 // WASP SHR BUG FIX END
 
-SUB AX, BX
-SHR BX
-
 RET
 
 // Result, BX Contains only the final hex digit, AX Contains the rest of the digits
 // splitlast END
 
-HALT
+
 
 // variables
 
@@ -75,8 +93,8 @@ VALUEB: DC.W 0x1FFE
 OPERATOR: DC.W 0x1FFD
 
 RETURN1: DC.W 0x1FFC
-RETURN1: DC.W 0x1FFB
-RETURN1: DC.W 0x1FFA
+RETURN2: DC.W 0x1FFB
+RETURN3: DC.W 0x1FFA
 
 ARG3: DC.W 0x1FF9
 ARG4: DC.W 0x1FF8
