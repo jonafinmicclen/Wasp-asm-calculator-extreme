@@ -13,15 +13,13 @@ MOV [OPERATOR], AX
 MOV AX, 0xABCD
 MOV BX, 0x0000
 
-CALL splitvalue
+CALL splitlast
 
 // MAIN END
 
 HALT
 
 // FUNCTIONS
-
-
 
 // FUNCTION START
 splitvalue:
@@ -33,7 +31,6 @@ MOV [AXCOPY], AX
 MOV AX, 0x00FF
 AND BX, AX
 MOV AX, [AXCOPY]
-// WASP SHR BUG FIX END
 
 //AX
 SUB AX, BX
@@ -56,20 +53,13 @@ RET
 
 // FUNCTION START
 splitlast:
-MOV BX, AX
-QSL BX
-LBBX
-QSR BX
 
-// WASP SHR BUG FIX START
+MOV BX, 0xFFF0
 MOV [AXCOPY], AX
-MOV AX, 0x0FFF
-AND BX, AX
-MOV AX, [AXCOPY]
-// WASP SHR BUG FIX END
-
-SUB AX, BX
-SHR BX
+AND AX, BX
+MOV BX, [AXCOPY]
+SUB BX, AX
+QSR AX
 
 // WASP SHR BUG FIX START
 MOV [BXCOPY], BX
@@ -80,7 +70,7 @@ MOV BX, [BXCOPY]
 
 RET
 
-// Result, BX Contains only the final hex digit, AX Contains the rest of the digits
+// Result, AX: 0x***0 > 4, BX 0x000*
 // splitlast END
 
 
