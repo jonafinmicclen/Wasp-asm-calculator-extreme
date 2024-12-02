@@ -1,15 +1,3 @@
-// test
-MOV AX, 0xE
-MOV [VALUEA], AX
-
-MOV AX, 0x6
-MOV [VALUEB], AX
-
-MOV AX, '+'
-MOV [OPERATOR], AX
-
-
-
 // MAIN START
 
 MOV AX, 0x000A
@@ -36,13 +24,17 @@ CALL splitlast
 
 CMP BX, 0x0A
 JL compareAintodigit
+
 INC AX
-SUB BX, 0x9
+SUB BX, 0x10
+
 compareAintodigit:
 
 MOV [TEMP4], AX
+
 MOV AX, [TEMP3]
 MOV [AX], BX
+
 MOV AX, [TEMP4]
 
 RET
