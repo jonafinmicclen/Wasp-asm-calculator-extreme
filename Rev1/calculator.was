@@ -10,10 +10,10 @@ MOV [OPERATOR], AX
 
 // MAIN START
 
-MOV AX, 0xFFFF
-MOV BX, 0xFFFF
+MOV AX, 0xAAAA
+MOV BX, 0X1111
 
-CALL hexadd
+CALL hexmulitply
 
 
 HALT
@@ -23,7 +23,60 @@ HALT
 
 // FUNCTIONS
 // FUNCTION START
-hexadd:
+distributeintodigit:
+// BX must contain address of target digit
+// AX must contain value to distribute
+
+MOV [TEMP3], BX
+// TEMP 3 is ptr to digit ptr so will need [[]]
+
+CALL splitlast
+
+// IF last digit more than 9 then
+// rest of number += 1
+// ELSE DO NOTHING
+// get last digit - 10 = the n'th DECIMAL
+// IF the last digit is a letter the remaider should be +=1 and the digit it the letter -10 if not then do nothing with rest
+
+
+RET
+// distributeintodigit END
+
+// FUNCTION START
+hexmulitply:
+
+CALL anbngenerator
+
+MOV BX, [AN00]
+
+MUL AX, BX
+MOV [RETURN0], AX
+
+MOV AX, [AN01]
+MOV BX, [BN00]
+MUL AX, BX
+MOV [TEMP2], AX
+MOV AX, [AN00]
+MOV BX, [BN01]
+MUL BX, AX
+MOV AX, [TEMP2]
+ADD AX, BX
+MOV [RETURN1], AX
+
+MOV AX, [AN01]
+MOV BX, [BN01]
+MUL AX, BX
+MOV [RETURN2], AX
+
+// HOW TO CONVERT THIS RESULT INTO DECIMAL
+
+RET
+// hexmulitply END
+
+
+
+// FUNCTION START
+anbngenerator:
 
 MOV [TEMP1], BX
 
@@ -39,6 +92,17 @@ CALL splitvalue
 MOV [BN00], AX
 MOV [BN01], BX
 
+RET
+// anbngenerator END
+
+
+
+// FUNCTION START
+hexadd:
+
+CALL anbngenerator
+
+// This works becuase of the state anbngenerator leaves.
 MOV AX, [AN01]
 ADD AX, BX
 
@@ -54,7 +118,6 @@ ADD AX, BX
 MOV BX, [TEMP1]
 
 RET
-
 // hexadd END
 
 
@@ -83,7 +146,6 @@ MOV BX, [BXCOPY]
 // WASP SHR BUG FIX END
 
 RET
-
 // Result, AX contains 0x**00 >> 8, BX contains 0x00** 
 // splitvalue END
 
@@ -107,7 +169,6 @@ MOV BX, [BXCOPY]
 // WASP SHR BUG FIX END
 
 RET
-
 // Result, AX: 0x***0 > 4, BX 0x000*
 // splitlast END
 
@@ -120,9 +181,9 @@ VALUEB: DC.W 0x1FFE
 
 OPERATOR: DC.W 0x1FFD
 
-RETURN1: DC.W 0x1FFC
-RETURN2: DC.W 0x1FFB
-RETURN3: DC.W 0x1FFA
+RETURN0: DC.W 0x1FFC
+RETURN1: DC.W 0x1FFB
+RETURN2: DC.W 0x1FFA
 
 ARG3: DC.W 0x1FF9
 ARG4: DC.W 0x1FF8
