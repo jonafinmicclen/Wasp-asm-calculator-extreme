@@ -1,0 +1,103 @@
+// test
+MOV AX, 0xE
+MOV [VALUEA], AX
+
+MOV AX, 0x6
+MOV [VALUEB], AX
+
+MOV AX, '+'
+MOV [OPERATOR], AX
+
+// code
+
+// find operator
+COMP OPERATOR, '+'
+JEQ ADDVALUES
+HALT
+
+// operation code
+ADDVALUES:
+MOV AX, [VALUEA]
+MOV BX, [VALUEB]
+
+// functions use AX and BX as arg1 and arg2 and return 1 and return 2 unless more neeeded then use extra from memory
+
+// FUNCTION START
+splitvalue:
+
+MOV BX, AX
+LBBX
+SUB AX, BX
+QSR AX
+QSR AX
+
+// WASP SHR BUG FIX START
+MOV [BXCOPY], BX
+MOV BX, 0x00FF
+AND AX, BX
+MOV BX, [BXCOPY]
+// WASP SHR BUG FIX ENDMOV BX, [BXCOPY]
+
+RET
+
+// Result, AX contains Highbyte, BX contains 
+// splitvalue END
+
+// FUNCTION START
+splitlast:
+MOV BX, AX
+QSL BX
+LBBX
+QSR BX
+
+// WASP SHR BUG FIX START
+MOV [BXCOPY], BX
+MOV BX, 0x0FFF
+AND AX, BX
+MOV BX, [BXCOPY]
+// WASP SHR BUG FIX END
+
+SUB AX, BX
+SHR BX
+
+RET
+
+// Result, BX Contains only the final hex digit, AX Contains the rest of the digits
+// splitlast END
+
+HALT
+
+// variables
+
+VALUEA: DC.W 0x1FFF
+VALUEB: DC.W 0x1FFE
+
+OPERATOR: DC.W 0x1FFD
+
+RETURN1: DC.W 0x1FFC
+RETURN1: DC.W 0x1FFB
+RETURN1: DC.W 0x1FFA
+
+ARG3: DC.W 0x1FF9
+ARG4: DC.W 0x1FF8
+ARG5: DC.W 0x1FF7
+
+DIGIT1: DC.W 0x1FF6
+DIGIT2: DC.W 0x1FF5
+DIGIT3: DC.W 0x1FF4
+DIGIT4: DC.W 0x1FF3
+DIGIT5: DC.W 0x1FF2
+DIGIT6: DC.W 0x1FF1
+DIGIT7: DC.W 0x1FF0
+DIGIT8: DC.W 0x1FEF
+DIGIT9: DC.W 0x1FEE
+DIGIT10: DC.W 0x1FED
+
+FUNCPTR: DC.W 0x1FEC
+
+TEMP1: DC.W 0x1FEB
+TEMP2: DC.W 0x1FEA
+TEMP3: DC.W 0x1FE9
+
+AXCOPY: DC.W 0x1FE8
+BXCOPY: DC.W 0x1FE7
