@@ -6,25 +6,23 @@ JMP loop
 HALT
 
 printchar:
-printcharloopother:
-MOV BX, [0x00F2]
-CMP BX, 0x0
-JEQ printcharloopother
 MOV [0x00F0], AX
+MOV BX, 0x0001
+MOV [0xF2], BX
 printcharloop:
 MOV BX, [0x00F2]
-CMP BX, 0x0
+CMP BX, 0x1
 JEQ printcharloop
 RET
 // Prints char in AX
 
 readnext:
-MOV AX, 0x00F5
-MOV [AX], 0x0
 readnextloop:
 MOV AX, [0x00F5]
-CMP AX, 0x1
+CMP AX, 0x0
 JEQ readnextloop
 MOV AX, [0x00F3]
+MOV BX, 0x00F5
+MOV [BX], 0x0
 RET
 // Leaves next letter in AX
