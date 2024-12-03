@@ -1,0 +1,43 @@
+CALL takenumericalinput
+MOV AX, [takenumericalinputvalue]
+HALT
+
+takenumericalinput:
+MOV AX, 0x0
+MOV [takenumericalinputvalue], AX
+takenumericalinputloop:
+CALL readnext
+CMP AX, '.'
+JEQ return
+SUB AX, '0'
+MOV BX, [takenumericalinputvalue]
+MUL BX, 0xA
+ADD BX, AX
+MOV [takenumericalinputvalue], BX
+JMP takenumericalinputloop
+// END OF takenumericalinput
+
+
+
+// Taken from console test
+readnext:
+readnextloop:
+MOV AX, [0x00F5]
+CMP AX, 0x0
+JEQ readnextloop
+MOV AX, [0x00F3]
+MOV BX, 0x00F5
+MOV [BX], 0x0
+RET
+// END OF readnext
+
+
+
+// Jump to this to use as: if () {return}.
+return:
+RET
+// END OF return
+
+
+
+takenumericalinputvalue: DC.W 0x1FFF
