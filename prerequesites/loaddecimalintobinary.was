@@ -1,0 +1,124 @@
+CALL takenumericalinput
+CALL converttohex
+MOV AX, [converttohexcumlativesum]
+HALT
+
+
+// Dynamically stores any size input into memory
+// Each digit has its own address
+takenumericalinput:
+
+// Sets number ptr to address of first digit of number
+MOV AX, numberstart
+MOV AX, [AX]
+MOV [numberptr], AX
+
+takenumericalinputloop:
+
+CALL readnext
+
+CMP AX, '.'
+JNE takenumericalinputterminateskip
+// Sets number end flag 0xFFFF
+MOV BX, 0xFFFF
+MOV AX, [numberptr]
+MOV [AX], BX
+// Calculates number size
+MOV AX, [numberptr]
+MOV BX, numberstart
+MOV BX, [BX]
+SUB BX, AX
+MOV [numbersize], BX
+RET
+takenumericalinputterminateskip:
+
+// Puts input number converted from ascii into numberptr address
+SUB AX, '0'
+MOV BX, [numberptr]
+MOV [BX], AX
+
+// Increments pointer
+MOV AX, [numberptr]
+DEC AX
+MOV [numberptr], AX
+
+JMP takenumericalinputloop
+// END OF takenumericalinput
+
+
+
+// Taken from console test
+readnext:
+readnextloop:
+MOV AX, [0x00F5]
+CMP AX, 0x0
+JEQ readnextloop
+MOV AX, [0x00F3]
+MOV BX, 0x00F5
+MOV [BX], 0x0
+RET
+
+
+
+printchar:
+MOV [0x00F0], AX
+MOV BX, 0x0001
+MOV [0xF2], BX
+printcharloop:
+MOV BX, [0x00F2]
+CMP BX, 0x1
+JEQ printcharloop
+RET
+// Prints char in AX
+
+
+// Convert number to hex, will put result into AX
+converttohex:
+MOV AX, numberstart
+MOV AX, [AX]
+MOV BX, [numbersize]
+DEC BX
+SUB AX, BX
+MOV [converttohexpointer], AX
+
+MOV BX, 0x0
+MOV [converttohexcumlativesum], BX
+
+converttohexloop:
+MOV AX, [converttohexcumlativesum]
+MOV BX, [converttohexpointer]
+MOV BX, [BX]
+ADD AX, BX
+MUL AX, 0xA
+MOV [converttohexcumlativesum], AX
+
+// IDK IF THIS WORK YET BUT SHOULD ADD DECIMAL ON THEN x10
+
+// Increment pointer, working backwards through number.
+MOV AX, [converttohexpointer]
+INC AX
+MOV [converttohexpointer], AX
+
+// End if converttohexpointer > numberstart BX > AX
+MOV AX, numberstart
+MOV AX, [AX]
+INC AX
+MOV BX, [converttohexpointer]
+CMP BX, AX
+JNE converttohexloop
+RET
+
+
+
+
+
+
+
+HALT
+numbersize: DC.W 0x1FBB
+numberstart: DC.W 0x1000
+numberptr: DC.W 0x1FFC
+// Subtract 1 from this address to get the second part of number and FFFF is terminator
+
+converttohexpointer: DC.W 0x1FFE
+converttohexcumlativesum: DC.W 0x1FFD
