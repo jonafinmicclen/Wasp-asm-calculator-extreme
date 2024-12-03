@@ -1,0 +1,30 @@
+loop:
+CALL readnext
+CALL printchar
+JMP loop
+
+HALT
+
+printchar:
+printcharloopother:
+MOV BX, [0x00F2]
+CMP BX, 0x0
+JEQ printcharloopother
+MOV [0x00F0], AX
+printcharloop:
+MOV BX, [0x00F2]
+CMP BX, 0x0
+JEQ printcharloop
+RET
+// Prints char in AX
+
+readnext:
+MOV AX, 0x00F5
+MOV [AX], 0x0
+readnextloop:
+MOV AX, [0x00F5]
+CMP AX, 0x1
+JEQ readnextloop
+MOV AX, [0x00F3]
+RET
+// Leaves next letter in AX
