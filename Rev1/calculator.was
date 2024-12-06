@@ -1,7 +1,8 @@
 // MAIN START
 
-MOV AX, 0x000F
-MOV BX, [DIGIT1]
+MOV AX, 0xAAAA
+MOV BX, 0xAAAA
+CALL hexmulitply
 HALT
 
 // MAIN END
@@ -16,7 +17,7 @@ CALL anbngenerator
 MOV BX, [AN00]
 
 MUL AX, BX
-MOV [RETURN0], AX
+MOV [ARG3], AX
 
 MOV AX, [AN01]
 MOV BX, [BN00]
@@ -27,14 +28,16 @@ MOV BX, [BN01]
 MUL BX, AX
 MOV AX, [TEMP2]
 ADD AX, BX
-MOV [RETURN1], AX
+MOV [ARG4], AX
 
 MOV AX, [AN01]
 MOV BX, [BN01]
 MUL AX, BX
-MOV [RETURN2], AX
+MOV [ARG5], AX
 
-// HOW TO CONVERT THIS RESULT INTO DECIMAL
+CALL combinethree
+
+// Print them all here with the hex to dec print function
 
 RET
 // hexmulitply END
@@ -42,6 +45,7 @@ RET
 
 
 // FUNCTION START
+// Splits ax and bx into 4 values a0,a1,b0,b1 containing low and high.
 anbngenerator:
 
 MOV [TEMP1], BX
@@ -70,10 +74,12 @@ CALL anbngenerator
 
 // This works becuase of the state anbngenerator leaves.
 MOV AX, [AN01]
+MOV BX, [BN01]
 ADD AX, BX
 
 CALL splitvalue
 
+// right result final in temp 1
 MOV [TEMP1], BX
 
 MOV BX, [AN00]
@@ -100,16 +106,10 @@ AND BX, AX
 MOV AX, [AXCOPY]
 
 //AX
-SUB AX, BX
 QSR AX
+CALL waspSHRfixAX
 QSR AX
-
-// WASP SHR BUG FIX START
-MOV [BXCOPY], BX
-MOV BX, 0x00FF
-AND AX, BX
-MOV BX, [BXCOPY]
-// WASP SHR BUG FIX END
+CALL waspSHRfixAX
 
 RET
 // Result, AX contains 0x**00 >> 8, BX contains 0x00** 
@@ -126,17 +126,32 @@ AND AX, BX
 MOV BX, [AXCOPY]
 SUB BX, AX
 QSR AX
-
-// WASP SHR BUG FIX START
-MOV [BXCOPY], BX
-MOV BX, 0x0FFF
-AND AX, BX
-MOV BX, [BXCOPY]
-// WASP SHR BUG FIX END
+CALL waspSHRfixAX
 
 RET
 // Result, AX: 0x***0 > 4, BX 0x000*
 // splitlast END
+
+waspSHRfixAX:
+MOV [BXCOPY], BX
+MOV BX, 0x0FFF
+AND AX, BX
+MOV BX, [BXCOPY]
+RET
+
+combinethree:
+MOV AX, [ARG5]
+CALL splitvalue
+MOV [RETURN0], BX
+MOV BX, [ARG4]
+CALL hexadd
+MOV [RETURN1], BX
+MOV BX, [ARG3]
+CALL hexadd
+MOV [RETURN2], AX
+MOV [RETURN3], BX
+RET
+
 
 
 
@@ -150,6 +165,7 @@ OPERATOR: DC.W 0x1FFD
 RETURN0: DC.W 0x1FFC
 RETURN1: DC.W 0x1FFB
 RETURN2: DC.W 0x1FFA
+RETURN3: DC.W 0x1FE1
 
 ARG3: DC.W 0x1FF9
 ARG4: DC.W 0x1FF8
@@ -181,3 +197,4 @@ BN00: DC.W 0x1FE4
 BN01: DC.W 0x1FE3
 
 TEMP4: DC.W 0x1FE2
+//fe1

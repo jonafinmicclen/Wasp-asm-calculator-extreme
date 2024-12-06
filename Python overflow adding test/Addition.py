@@ -23,6 +23,7 @@ def add(a, b):
 
     print(f'remainder: {hex(remainder)}')
     left_result_final = remainder + a0+b0
+    print(f'a0{hex(a0)}, b0{hex(b0)}')
 
     print(f'result: {str(hex(left_result_final))[2:]}{str(hex(right_result_final))[2:]}')
 

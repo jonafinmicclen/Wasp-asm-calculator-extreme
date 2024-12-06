@@ -6,7 +6,11 @@ a = np.uint16(random.randint(0, 0xFFFF))
 b = np.uint16(random.randint(0, 0xFFFF))
 
 a = 0xAAAA
-b = 0x1111
+b = 0xAAAA
+
+aone, bone = Addition.add(a, b)
+print(f'{hex(aone), hex(bone)}')
+
 
 r1, r2 = Addition.add(a, b)
 print(f'r1: {hex(r1)}, r2: {hex(r2)}')
@@ -27,17 +31,18 @@ def multiply(a, b):
     r2 = a1*b1
     
     print(f'r0: {hex(r0)}, r1: {hex(r1)}, r2: {hex(r2)}')
-    exit()
 
     final_value_0, final_value_1, final_value_2, final_value_3 = Addition.combine3(r0, r1, r2)
+
+    print(f'\n\n{str(hex(final_value_0))[2:]}, {str(hex(final_value_1))[2:]}, {str(hex(final_value_2))[2:]}, {str(hex(final_value_3))[2:]}')
     
     return final_value_0, final_value_1, final_value_2, final_value_3
 
 final_value_0, final_value_1, final_value_2, final_value_3 = multiply(a, b)
 
-print(f'{str(hex(final_value_0))[2:]}, {str(hex(final_value_1))[2:]}, {str(hex(final_value_2))[2:]}, {str(hex(final_value_3))[2:]}')
+print(f'\n\n{str(hex(final_value_0))[2:]}, {str(hex(final_value_1))[2:]}, {str(hex(final_value_2))[2:]}, {str(hex(final_value_3))[2:]}')
 
-print(f'{hex(int(a)*int(b))}')
+print(f'\n\n{hex(int(a)*int(b))}')
 
 # Final step is to implement the adding ffs.... This also means i could have used a for loop of length b of adding a to itself. woudl have been slow like that tho
 
