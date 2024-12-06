@@ -1,0 +1,257 @@
+MOV AX, 0d65535
+CALL outputBinToDec
+HALT
+
+
+// Outputs AX contents in Decimal to console
+outputBinToDec:
+
+MOV [nextNumberToConvertBinToDec], AX
+
+// Initialise pointer for array
+CALL globalPointerInitialise
+CALL globalPointerSetDirectionIncrement
+
+// start of loop
+
+binToDecFillArrayLoop: 
+
+MOV AX, [nextNumberToConvertBinToDec]
+CALL modulusbyten
+ADD AX, '0'
+CALL globalAXIntoPointer
+
+MOV AX, [nextNumberToConvertBinToDec]
+CALL divisionbyten
+MOV [nextNumberToConvertBinToDec], AX
+
+CALL globalPointerUpdate
+
+MOV AX, [nextNumberToConvertBinToDec]
+CMP AX, 0d10
+JGE binToDecFillArrayLoop
+
+// end of loop
+
+ADD AX, '0'
+CALL printchar
+CALL globalPointerSetDirectionDecrement
+// Updating pointer bc last loop increments 1 too many times..
+CALL globalPointerUpdate
+
+binToHexOutputLoop:
+
+CALL globalGetDataAtPointerIntoAX
+CALL printchar
+
+CALL globalPointerUpdate
+
+// End condition, could be in function maybe
+MOV AX, [GlobalPointer]
+MOV BX, GlobalPointerStart
+MOV BX, [BX]
+CMP AX, BX
+
+JL return
+
+JMP binToHexOutputLoop
+
+// END OF outputBinToDec
+
+
+
+takenumericalinput:
+MOV AX, 0x0
+MOV [takenumericalinputvalue], AX
+takenumericalinputloop:
+CALL readnext
+CMP AX, '.'
+JEQ return
+SUB AX, '0'
+MOV BX, [takenumericalinputvalue]
+MUL BX, 0xA
+ADD BX, AX
+MOV [takenumericalinputvalue], BX
+JMP takenumericalinputloop
+// END OF takenumericalinput
+
+
+
+// Taken from console test
+readnext:
+readnextloop:
+MOV AX, [0x00F5]
+CMP AX, 0x0
+JEQ readnextloop
+MOV AX, [0x00F3]
+MOV BX, 0x00F5
+MOV [BX], 0x0
+RET
+// END OF readnext
+
+
+
+// Jump to this to use as: if () {return}.
+return:
+RET
+// END OF return
+
+
+
+printchar:
+MOV [0x00F0], AX
+MOV BX, 0x0001
+MOV [0xF2], BX
+printcharloop:
+MOV BX, [0x00F2]
+CMP BX, 0x1
+JEQ printcharloop
+RET
+// Prints char in AX
+
+
+
+// Do not use this inside a function already using this at some preceeding function call
+// Global pointer functions
+
+
+globalPointerInitialise:
+MOV AX, GlobalPointerStart
+MOV AX, [AX]
+MOV [GlobalPointer], AX
+RET
+
+globalGetDataAtPointerIntoAX:
+MOV BX, [GlobalPointer]
+MOV AX, [BX]
+RET
+
+globalPointerSetDirectionIncrement:
+MOV BX, 0x0
+MOV [GlobalPointerDirection], BX
+RET
+
+globalPointerSetDirectionDecrement:
+MOV BX, 0x1
+MOV [GlobalPointerDirection], BX
+RET
+
+globalAXIntoPointer:
+MOV BX, [GlobalPointer]
+MOV [BX], AX
+RET
+
+
+globalPointerUpdate:
+
+// Check flag decrementing
+MOV BX, [GlobalPointerDirection]
+CMP BX, 0x0
+JEQ GlobalPointerIncrement
+
+MOV AX, [GlobalPointer]
+DEC AX
+MOV [GlobalPointer], AX
+
+RET
+
+GlobalPointerIncrement:
+
+MOV AX, [GlobalPointer]
+INC AX
+MOV [GlobalPointer], AX
+
+RET
+
+// Runs function in BX
+MaintainAXRegisterFunctionWrapper:
+MOV [AXCopyForWrapper], AX
+CALL AX
+MOV AX, [AXCopyForWrapper]
+RET
+
+
+
+// FUNCTION START
+splitvalue:
+
+MOV BX, AX
+
+//BX
+MOV [AXCOPY], AX
+MOV AX, 0x00FF
+AND BX, AX
+MOV AX, [AXCOPY]
+
+//AX
+SUB AX, BX
+QSR AX
+QSR AX
+
+// WASP SHR BUG FIX START
+MOV [BXCOPY], BX
+MOV BX, 0x00FF
+AND AX, BX
+MOV BX, [BXCOPY]
+// WASP SHR BUG FIX END
+
+RET
+// Result, AX contains 0x**00 >> 8, BX contains 0x00** 
+// splitvalue END
+
+
+modulusbyten:
+CALL splitvalue
+MOD AX, 0d10
+MOD BX, 0d10
+QSL AX
+QSL AX
+ADD AX, BX
+MOD AX, 0d10
+RET
+
+divisionbyten:
+CALL splitvalue
+MOV [divisionbytentemplow], BX
+MOV BX, AX
+
+DIV AX, 0d10
+MOV [divisionbytentemphighfinal], AX
+
+MOD BX, 0d10
+QSL BX
+QSL BX
+
+MOV AX, [divisionbytentemplow]
+
+ADD BX, AX
+DIV BX, 0d10
+
+MOV AX, [divisionbytentemphighfinal]
+QSL AX
+QSL AX
+
+ADD AX, BX
+
+RET
+
+
+
+// VARIABLES
+
+takenumericalinputvalue: DC.W 0x1FFF
+nextNumberToConvertBinToDec: DC.W 0x1FFE
+BXCOPY: DC.W 0x1FFD
+
+// Vars for 'array'
+GlobalPointerStart: DC.W 0x1000
+GlobalPointer: DC.W 0x1FFC
+GlobalPointerDirection: DC.W 0xFFB
+// 0 == increment, 1 == decrement
+
+AXCopyForWrapper: DC.W 0x1FFA
+
+AXCOPY: DC.W 0x1FF8
+
+divisionbytentemplow: DC.W 0x1FF7
+divisionbytentemphighfinal: DC.W 0x1FF6
