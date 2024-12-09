@@ -93,6 +93,26 @@ RET
 // hexadd END
 
 
+// FUNCTION START
+// Splits ax and bx into 4 values a0,a1,b0,b1 containing low and high.
+anbngenerator:
+
+MOV [TEMP1], BX
+
+CALL splitvalue
+
+MOV [AN00], AX
+MOV [AN01], BX
+
+MOV AX, [TEMP1]
+
+CALL splitvalue
+
+MOV [BN00], AX
+MOV [BN01], BX
+
+RET
+// anbngenerator END
 
 // FUNCTION START
 splitvalue:

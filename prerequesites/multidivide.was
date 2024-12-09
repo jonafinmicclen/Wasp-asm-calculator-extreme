@@ -1,34 +1,175 @@
-modulusbyten:
+MOV AX, 0xFFFF
+MOV BX, 0xFFFF
+
+CALL 32bitdivisionbyten
+
+HALT
+
+
+32bitdivisionbyten:
+
+MOV [32divlow], BX
+
+CALL 16bitdivisionbyten
+MOV [32divhigh], AX
+
+MOV AX, [32divlow]
+QSL BX
+QSL BX
+MOV [32divrem], BX
+
 CALL splitvalue
-MOD AX, 0d10
-MOD BX, 0d10
-QSL AX
-QSL AX
+MOV [16divlow], BX
+
+MOV BX, [32divrem]
 ADD AX, BX
-MOD AX, 0d10
+
+MOV BX, AX
+DIV AX, 0d10
+MOD BX, 0d10
+
+MOV [TEMP2], AX
+
+MOV AX, [16divlow]
+QSL BX
+QSL BX
+ADD AX, BX
+
+MOV BX, AX
+DIV AX, 0d10
+MOD BX, 0d10
+
+MOV [32divrem], BX
+MOV BX, [TEMP2]
+QSL BX
+QSL BX
+ADD BX, AX
+
+MOV AX, [32divhigh]
+
 RET
 
-divisionbyten:
+
+
+16bitdivisionbyten:
+
 CALL splitvalue
-MOV [divisionbytentemplow], BX
+MOV [16divhigh], AX
+MOV [16divlow], BX
+
+MOV BX, AX
+DIV AX, 0d10
+MOD BX, 0d10
+MOV [16divhigh], AX
+// ResultHigh in AX Remainder in BX
+
+MOV AX, [16divlow]
+QSL BX
+QSL BX
+ADD AX, BX
+
+MOV BX, AX
+DIV AX, 0d10
+MOD BX, 0d10
+
+MOV [16divrem], BX
+
+MOV BX, [16divhigh]
+QSL BX
+QSL BX
+ADD AX, BX
+MOV BX, [16divrem]
+// Remainder in BX ResultLow in AX
+
+RET
+
+
+splitvalue:
+
 MOV BX, AX
 
-DIV AX, 0d10
-MOV [divisionbytentemphighfinal], AX
+//BX
+MOV [AXCOPY], AX
+MOV AX, 0x00FF
+AND BX, AX
+MOV AX, [AXCOPY]
 
-MOD BX, 0d10
-QSL BX
-QSL BX
+//AX
+SUB AX, BX
+QSR AX
+QSR AX
 
-MOV AX, [divisionbytentemplow]
-
-ADD BX, AX
-DIV BX, 0d10
-
-MOV AX, [divisionbytentemphighfinal]
-QSL AX
-QSL AX
-
-ADD AX, BX
+// WASP SHR BUG FIX START
+MOV [BXCOPY], BX
+MOV BX, 0x00FF
+AND AX, BX
+MOV BX, [BXCOPY]
+// WASP SHR BUG FIX END
 
 RET
+
+
+// FUNCTION START
+hexadd:
+
+CALL anbngenerator
+
+// This works becuase of the state anbngenerator leaves.
+MOV AX, [AN01]
+MOV BX, [BN01]
+ADD AX, BX
+
+CALL splitvalue
+
+// right result final in temp 1
+MOV [TEMP1], BX
+
+MOV BX, [AN00]
+ADD AX, BX
+MOV BX, [BN00]
+ADD AX, BX
+
+MOV BX, [TEMP1]
+
+RET
+// hexadd END
+
+// FUNCTION START
+// Splits ax and bx into 4 values a0,a1,b0,b1 containing low and high.
+anbngenerator:
+
+MOV [TEMP1], BX
+
+CALL splitvalue
+
+MOV [AN00], AX
+MOV [AN01], BX
+
+MOV AX, [TEMP1]
+
+CALL splitvalue
+
+MOV [BN00], AX
+MOV [BN01], BX
+
+RET
+// anbngenerator END
+
+
+32divhigh: DC.W 0x1FFF
+32divlow: DC.W 0x1FFE
+32divrem: DC.W 0x1FF7
+AXCOPY: DC.W 0x1FFD
+BXCOPY: DC.W 0x1FFC
+16divlow: DC.W 0x1FFB
+16divhigh: DC.W 0x1FFA
+16divrem: DC.W 0x1FF8
+copy: DC.W 0x1FF9
+
+AN00: DC.W 0x1FE6
+AN01: DC.W 0x1FE5
+BN00: DC.W 0x1FE4
+BN01: DC.W 0x1FE3
+TEMP1: DC.W 0x1FEB
+TEMP2: DC.W 0x1FEA
+TEMP3: DC.w 0x1FE9
