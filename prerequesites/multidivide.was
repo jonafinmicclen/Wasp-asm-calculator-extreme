@@ -1,0 +1,34 @@
+modulusbyten:
+CALL splitvalue
+MOD AX, 0d10
+MOD BX, 0d10
+QSL AX
+QSL AX
+ADD AX, BX
+MOD AX, 0d10
+RET
+
+divisionbyten:
+CALL splitvalue
+MOV [divisionbytentemplow], BX
+MOV BX, AX
+
+DIV AX, 0d10
+MOV [divisionbytentemphighfinal], AX
+
+MOD BX, 0d10
+QSL BX
+QSL BX
+
+MOV AX, [divisionbytentemplow]
+
+ADD BX, AX
+DIV BX, 0d10
+
+MOV AX, [divisionbytentemphighfinal]
+QSL AX
+QSL AX
+
+ADD AX, BX
+
+RET

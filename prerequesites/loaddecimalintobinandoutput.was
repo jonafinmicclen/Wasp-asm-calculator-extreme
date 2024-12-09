@@ -3,6 +3,7 @@ CALL outputBinToDec
 HALT
 
 
+
 // Outputs AX contents in Decimal to console
 outputBinToDec:
 
