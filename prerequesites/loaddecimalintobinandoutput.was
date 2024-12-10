@@ -1,7 +1,7 @@
-MOV AX, 0xBFFF
-MOV BX, 0xFFFF
-CALL outputBinToDec32
-MOV AX, [32divrem]
+CALL outputTextFromMemory
+CALL takeInput
+MOV AX, [operandA]
+MOV BX, [operandB]
 HALT
 
 
@@ -69,8 +69,20 @@ MOV AX, 0x0
 MOV [takenumericalinputvalue], AX
 takenumericalinputloop:
 CALL readnext
-CMP AX, '.'
+
+// Put delimiters here
+MOV [operator], AX  // This stores everything but its only left unchanged when a valid delimiter is present so it works but is a bit cheap
+CMP AX, '+' 
 JEQ return
+CMP AX, '-' 
+JEQ return
+CMP AX, '*' 
+JEQ return
+CMP AX, '/' 
+JEQ return
+CMP AX, '=' 
+JEQ return
+
 SUB AX, '0'
 MOV BX, [takenumericalinputvalue]
 MUL BX, 0xA
@@ -104,11 +116,11 @@ RET
 
 printchar:
 MOV [0x00F0], AX
-MOV BX, 0x0001
-MOV [0xF2], BX
+MOV AX, 0x0001
+MOV [0xF2], AX
 printcharloop:
-MOV BX, [0x00F2]
-CMP BX, 0x1
+MOV AX, [0x00F2]
+CMP AX, 0x1
 JEQ printcharloop
 RET
 // Prints char in AX
@@ -563,6 +575,46 @@ JMP binToHexOutputLoop32
 // END OF outputBinToDec
 
 
+outputTextFromMemory:
+MOV BX, text0
+outputTextFromMemoryLoop:
+MOV AX, [BX]
+CMP AX, 0xFF
+JEQ return
+CALL printchar
+ADD BX, 0x1
+JMP outputTextFromMemoryLoop
+
+
+
+
+takeInput:
+CALL takenumericalinput
+MOV AX, [takenumericalinputvalue]
+MOV [operandA], AX
+CALL takenumericalinput
+MOV AX, [takenumericalinputvalue]
+MOV [operandB], AX
+RET
+
+
+
+calculateResultant:
+MOV AX, [operator]
+COMP AX, '*'
+JNE notmultiply
+
+MOV AX, [operandA]
+MOV BX, [operandB]
+CALL hexmulitply
+
+notmultiply:
+
+
+
+CALL outputBinToDec32
+
+
 
 
 // VARIABLES
@@ -594,5 +646,89 @@ copy: DC.W 0x1DF9
 
 TEMP2: DC.W 0x1DF8
 
+operandA: DC.W 0x1DF7
+operandB: DC.W 0x1DF6
+operator: DC.W 0x1DF5
+resultant: DC.W 0x1DF4
+
 nextNumberToConvertBinToDecHigh: DC.W 0x1DF7
 nextNumberToConvertBinToDecLow: DC.W 0x1DF6
+
+// Output text begin here
+text0: DC.W 'P'
+text1: DC.W 'l'
+text2: DC.W 'e'
+text3: DC.W 'a'
+text4: DC.W 's'
+text5: DC.W 'e'
+text6: DC.W ' '
+text7: DC.W 'e'
+text8: DC.W 'n'
+text9: DC.W 't'
+text10: DC.W 'e'
+text11: DC.W 'r'
+text12: DC.W ' '
+text13: DC.W 'y'
+text14: DC.W 'o'
+text15: DC.W 'u'
+text16: DC.W 'r'
+text17: DC.W ' '
+text18: DC.W 'e'
+text19: DC.W 'x'
+text20: DC.W 'p'
+text21: DC.W 'r'
+text22: DC.W 'e'
+text23: DC.W 's'
+text24: DC.W 's'
+text25: DC.W 'i'
+text26: DC.W 'o'
+text27: DC.W 'n'
+text28: DC.W ' '
+text29: DC.W 'i'
+text30: DC.W 'n'
+text31: DC.W ' '
+text32: DC.W 't'
+text33: DC.W 'h'
+text34: DC.W 'e'
+text35: DC.W ' '
+text36: DC.W 'f'
+text37: DC.W 'o'
+text38: DC.W 'r'
+text39: DC.W 'm'
+text40: DC.W 'a'
+text41: DC.W 't'
+text42: DC.W ' '
+text43: DC.W '"'
+text44: DC.W 'a'
+text45: DC.W '+'
+text46: DC.W 'b'
+text47: DC.W '='
+text48: DC.W '"'
+text49: DC.W ' '
+text50: DC.W 'm'
+text51: DC.W 'a'
+text52: DC.W 'x'
+text53: DC.W ' '
+text54: DC.W 'i'
+text55: DC.W 'n'
+text56: DC.W 'p'
+text57: DC.W 'u'
+text58: DC.W 't'
+text59: DC.W ' '
+text60: DC.W 'n'
+text61: DC.W 'u'
+text62: DC.W 'm'
+text63: DC.W 'b'
+text64: DC.W 'e'
+text65: DC.W 'r'
+text66: DC.W ' '
+text67: DC.W 'i'
+text68: DC.W 's'
+text69: DC.W ' '
+text70: DC.W '6'
+text71: DC.W '5'
+text72: DC.W '5'
+text73: DC.W '3'
+text74: DC.W '5'
+text75: DC.W ':'
+textendmarker: DC.W 0xFF
