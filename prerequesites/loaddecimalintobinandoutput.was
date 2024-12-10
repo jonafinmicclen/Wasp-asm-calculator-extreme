@@ -1,7 +1,43 @@
+// MAx tested 4000 * 4000 = 16000000
+
+mainstart:
+
+MOV AX, 0x0
+MOV BX, 0x0
+
+MOV BX, text0
 CALL outputTextFromMemory
+
 CALL takeInput
+
 MOV AX, [operandA]
 MOV BX, [operandB]
+
+// Print what they wrote before the answer
+MOV AX, 0x0
+MOV BX, [operandA]
+CALL outputBinToDec32
+MOV AX, [operator]
+CALL printchar
+MOV AX, 0x0
+MOV BX, [operandB]
+CALL outputBinToDec32
+MOV AX, '='
+CALL printchar
+
+// Calculate answer and output
+MOV AX, [operandA]
+MOV BX, [operandB]
+CALL hexmulitply
+CALL outputBinToDec32
+
+// Leave two spaces for next one
+MOV AX, 0xA
+CALL printchar
+MOV AX, 0xA
+CALL printchar
+
+JMP mainstart
 HALT
 
 
@@ -63,15 +99,54 @@ JMP binToHexOutputLoop
 // END OF outputBinToDec
 
 
+hexadd:
+
+CALL anbngenerator
+
+// This works becuase of the state anbngenerator leaves.
+MOV AX, [AN01]
+MOV BX, [BN01]
+ADD AX, BX
+
+CALL splitvalue
+
+// right result final in temp 1
+MOV [TEMP1], BX
+
+MOV BX, [AN00]
+ADD AX, BX
+MOV BX, [BN00]
+ADD AX, BX
+
+MOV BX, [TEMP1]
+
+RET
+// hexadd END
+
+
+combinethree:
+MOV AX, [ARG5]
+CALL splitvalue
+MOV [RETURN0], BX
+MOV BX, [ARG4]
+CALL hexadd
+MOV [RETURN1], BX
+MOV BX, [ARG3]
+CALL hexadd
+MOV [RETURN2], AX
+MOV [RETURN3], BX
+RET
+
 
 takenumericalinput:
 MOV AX, 0x0
-MOV [takenumericalinputvalue], AX
+MOV BX, 0x0
+MOV [takenumericalinputvalue], BX
 takenumericalinputloop:
 CALL readnext
 
 // Put delimiters here
-MOV [operator], AX  // This stores everything but its only left unchanged when a valid delimiter is present so it works but is a bit cheap
+MOV [operatormamaybe], AX  // This stores everything but its only left unchanged when a valid delimiter is present so it works but is a bit cheap
 CMP AX, '+' 
 JEQ return
 CMP AX, '-' 
@@ -188,6 +263,182 @@ RET
 
 
 
+
+
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+
+
 // FUNCTION START
 splitvalue:
 
@@ -250,180 +501,6 @@ QSL AX
 ADD AX, BX
 
 RET
-
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
 
 
 
@@ -527,7 +604,7 @@ CALL 32bitdivisionbyten
 MOV [nextNumberToConvertBinToDecHigh], AX
 MOV [nextNumberToConvertBinToDecLow], BX
 
-MOV AX, [32divrem] 
+MOV AX, [32divrem]
 ADD AX, '0'
 CALL globalAXIntoPointer
 
@@ -574,47 +651,114 @@ JMP binToHexOutputLoop32
 
 // END OF outputBinToDec
 
-
+// BX must contain pointer to start of text in memory
 outputTextFromMemory:
-MOV BX, text0
-outputTextFromMemoryLoop:
 MOV AX, [BX]
 CMP AX, 0xFF
 JEQ return
 CALL printchar
 ADD BX, 0x1
-JMP outputTextFromMemoryLoop
+JMP outputTextFromMemory
 
 
 
 
 takeInput:
+
 CALL takenumericalinput
 MOV AX, [takenumericalinputvalue]
 MOV [operandA], AX
+
+MOV AX, [operatormamaybe]
+MOV [operator], AX
+
 CALL takenumericalinput
 MOV AX, [takenumericalinputvalue]
 MOV [operandB], AX
+
 RET
 
 
 
 calculateResultant:
-MOV AX, [operator]
-COMP AX, '*'
+MOV AX, [operatormamaybe]
+CMP AX, '*'
 JNE notmultiply
 
 MOV AX, [operandA]
 MOV BX, [operandB]
 CALL hexmulitply
-
 notmultiply:
 
-
-
 CALL outputBinToDec32
+RET
 
 
+
+hexmulitply:
+
+CALL anbngenerator
+
+MOV BX, [AN00]
+
+MUL AX, BX
+MOV [ARG3], AX
+
+MOV AX, [AN01]
+MOV BX, [BN00]
+MUL AX, BX
+MOV [TEMP2], AX
+MOV AX, [AN00]
+MOV BX, [BN01]
+MUL BX, AX
+MOV AX, [TEMP2]
+ADD AX, BX
+MOV [ARG4], AX
+
+MOV AX, [AN01]
+MOV BX, [BN01]
+MUL AX, BX
+MOV [ARG5], AX
+
+CALL combinethree
+
+// Print them all here with the hex to dec print function
+MOV AX, [RETURN0]
+MOV BX, [RETURN1]
+QSL BX
+QSL BX
+ADD BX, AX
+// BX contains the high component
+MOV [RETURN0], BX
+MOV AX, [RETURN2]
+MOV BX, [RETURN3]
+MUL AX, 0x10
+MUL AX, 0x10
+ADD AX, BX
+MOV BX, [RETURN0]
+
+RET
+// hexmulitply END
+
+
+anbngenerator:
+
+MOV [TEMP1], BX
+
+CALL splitvalue
+
+MOV [AN00], AX
+MOV [AN01], BX
+
+MOV AX, [TEMP1]
+
+CALL splitvalue
+
+MOV [BN00], AX
+MOV [BN01], BX
+
+RET
+// anbngenerator END
 
 
 // VARIABLES
@@ -644,15 +788,35 @@ divisionbytentemphighfinal: DC.W 0x1FF6
 16divrem: DC.W 0x1DF8
 copy: DC.W 0x1DF9
 
-TEMP2: DC.W 0x1DF8
+TEMP2: DC.W 0x1DCA
 
-operandA: DC.W 0x1DF7
+operandA: DC.W 0x1DCE
 operandB: DC.W 0x1DF6
-operator: DC.W 0x1DF5
+operatormamaybe: DC.W 0x1DCF
+operator: DC.W 0x1DC7
 resultant: DC.W 0x1DF4
 
-nextNumberToConvertBinToDecHigh: DC.W 0x1DF7
-nextNumberToConvertBinToDecLow: DC.W 0x1DF6
+nextNumberToConvertBinToDecHigh: DC.W 0x1DE8
+nextNumberToConvertBinToDecLow: DC.W 0x1DE7
+
+
+TEMP1: DC.W 0x1DF5
+TEMP3: DC.W 0x1DF3
+
+AN00: DC.W 0x1DF2
+AN01: DC.W 0x1DF1
+BN00: DC.W 0x1DF0
+BN01: DC.W 0x1DCB
+
+ARG3: DC.W 0x1DEF
+ARG4: DC.W 0x1DEE
+ARG5: DC.W 0x1DED
+
+
+RETURN0: DC.W 0x1DEC
+RETURN1: DC.W 0x1DEB
+RETURN2: DC.W 0x1DEA
+RETURN3: DC.W 0x1DE9
 
 // Output text begin here
 text0: DC.W 'P'
@@ -731,4 +895,20 @@ text72: DC.W '5'
 text73: DC.W '3'
 text74: DC.W '5'
 text75: DC.W ':'
+text76: DC.W 0xA
 textendmarker: DC.W 0xFF
+
+youentered0: DC.W 'Y'
+youentered1: DC.W 'o'
+youentered2: DC.W 'u'
+youentered3: DC.W ' '
+youentered4: DC.W 'e'
+youentered5: DC.W 'n'
+youentered6: DC.W 't'
+youentered7: DC.W 'e'
+youentered8: DC.W 'r'
+youentered9: DC.W 'e'
+youentered10: DC.W 'd'
+youentered11: DC.W ':'
+youentered12: DC.W 0xA
+youenteredend: DC.W 0xFF

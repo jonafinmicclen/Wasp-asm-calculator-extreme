@@ -1,0 +1,4 @@
+CALL outputTextFromMemory
+CALL takeInput
+MOV AX, [operandA]
+MOV BX, [operandB]

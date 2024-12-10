@@ -37,8 +37,7 @@ MOV [ARG5], AX
 
 CALL combinethree
 
-// Print them all here with the hex to dec print function
-
+//Combine results so AX is High and BX is Low of 32bits number
 RET
 // hexmulitply END
 
