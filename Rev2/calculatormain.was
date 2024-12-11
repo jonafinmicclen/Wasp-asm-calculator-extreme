@@ -1,9 +1,4 @@
-// MAx tested 4000 * 4000 = 16000000
-
 mainstart:
-
-MOV AX, 0x0
-MOV BX, 0x0
 
 MOV BX, text0
 CALL outputTextFromMemory
@@ -25,11 +20,34 @@ CALL outputBinToDec32
 MOV AX, '='
 CALL printchar
 
-// Calculate answer and output
-MOV AX, [operandA]
-MOV BX, [operandB]
-CALL hexmulitply
-CALL outputBinToDec32
+// Check what operator is and output correct number based on that
+MOV AX, [operator]
+
+CMP AX, '*'
+JNE notmultiply
+CALL HandleMultiply
+notmultiply:
+
+CMP AX, '+'
+JNE notadd
+CALL HandleAdd
+notadd:
+
+CMP AX, '/'
+JNE notdivide
+CALL HandleDivide
+notdivide:
+
+CMP AX, '%'
+JNE notmod
+CALL HandleMod
+notmod:
+
+CMP AX, '-'
+JNE notsubtract
+CALL HandleSubtract
+notsubtract:
+
 
 // Leave two spaces for next one
 MOV AX, 0xA
@@ -40,7 +58,415 @@ CALL printchar
 JMP mainstart
 HALT
 
+HandleMultiply:
+MOV AX, [operandA]
+MOV BX, [operandB]
+CALL hexmulitply
+CALL outputBinToDec32
+RET
 
+HandleAdd:
+MOV AX, [operandA]
+MOV BX, [operandB]
+CALL hexadd
+MOV [TEMP1], BX
+CALL splitvalue
+QSL BX
+QSL BX
+MOV [TEMP2], AX
+MOV AX, [TEMP1]
+ADD BX, AX
+MOV AX, [TEMP2]
+CALL outputBinToDec32
+RET
+
+HandleDivide:
+MOV AX, [operandA]
+MOV BX, [operandB]
+DIV AX, BX
+MOV BX, AX
+MOV AX, 0x0
+CALL outputBinToDec32
+RET
+
+HandleMod:
+MOV AX, [operandA]
+MOV BX, [operandB]
+MOD AX, BX
+MOV BX, AX
+MOV AX, 0x0
+CALL outputBinToDec32
+RET
+
+HandleSubtract:
+MOV AX, [operandA]
+MOV BX, [operandB]
+CALL hexsub
+MOV [TEMP1], BX
+CALL splitvalue
+QSL BX
+QSL BX
+MOV [TEMP2], AX
+MOV AX, [TEMP1]
+ADD BX, AX
+MOV AX, [TEMP2]
+CALL outputBinToDec32
+RET
+
+
+
+
+
+
+
+
+
+
+
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
 
 // Outputs AX contents in Decimal to console
 outputBinToDec:
@@ -123,6 +549,30 @@ MOV BX, [TEMP1]
 RET
 // hexadd END
 
+hexsub:
+
+CALL anbngenerator
+
+// This works becuase of the state anbngenerator leaves.
+MOV AX, [AN01]
+MOV BX, [BN01]
+SUB AX, BX
+
+CALL splitvalue
+
+// right result final in temp 1
+MOV [TEMP1], BX
+
+MOV BX, [AN00]
+SUB AX, BX
+MOV BX, [BN00]
+SUB AX, BX
+
+MOV BX, [TEMP1]
+
+RET
+// hexSUB END
+
 
 combinethree:
 MOV AX, [ARG5]
@@ -143,6 +593,7 @@ MOV AX, 0x0
 MOV BX, 0x0
 MOV [takenumericalinputvalue], BX
 takenumericalinputloop:
+
 CALL readnext
 
 // Put delimiters here
@@ -156,6 +607,8 @@ JEQ return
 CMP AX, '/' 
 JEQ return
 CMP AX, '=' 
+JEQ return
+CMP AX, '%' 
 JEQ return
 
 SUB AX, '0'
@@ -187,10 +640,8 @@ return:
 RET
 // END OF return
 
-
-
 printchar:
-MOV [0x00F0], AX
+MOV [0xF0], AX
 MOV AX, 0x0001
 MOV [0xF2], AX
 printcharloop:
@@ -207,14 +658,13 @@ RET
 
 
 globalPointerInitialise:
-MOV AX, GlobalPointerStart
-MOV AX, [AX]
+MOV AX, [GlobalPointerStart]
 MOV [GlobalPointer], AX
 RET
 
 globalGetDataAtPointerIntoAX:
-MOV BX, [GlobalPointer]
-MOV AX, [BX]
+MOV AX, [GlobalPointer]
+MOV AX, [AX]
 RET
 
 globalPointerSetDirectionIncrement:
@@ -262,181 +712,6 @@ MOV AX, [AXCopyForWrapper]
 RET
 
 
-
-
-
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
 
 
 // FUNCTION START
@@ -673,24 +948,10 @@ MOV AX, [operatormamaybe]
 MOV [operator], AX
 
 CALL takenumericalinput
+CALL readnext
 MOV AX, [takenumericalinputvalue]
 MOV [operandB], AX
 
-RET
-
-
-
-calculateResultant:
-MOV AX, [operatormamaybe]
-CMP AX, '*'
-JNE notmultiply
-
-MOV AX, [operandA]
-MOV BX, [operandB]
-CALL hexmulitply
-notmultiply:
-
-CALL outputBinToDec32
 RET
 
 
@@ -761,62 +1022,150 @@ RET
 // anbngenerator END
 
 
-// VARIABLES
+HALT
 
-takenumericalinputvalue: DC.W 0x1FFF
-nextNumberToConvertBinToDec: DC.W 0x1FFE
+nextNumberToConvertBinToDec: DC.W 0x10f1
 
-// Vars for 'array' or 'GlobalPointer'
+AXCopyForWrapper: DC.W 0x10f5
+AXCOPY: DC.W 0x10f6
+BXCOPY: DC.W 0x10f7
+divisionbytentemplow: DC.W 0x10f8
+divisionbytentemphighfinal: DC.W 0x10f9
+32divhigh: DC.W 0x10fa
+32divlow: DC.W 0x10fb
+32divrem: DC.W 0x10fc
+16divlow: DC.W 0x10fd
+16divhigh: DC.W 0x10fe
+16divrem: DC.W 0x10ff
+copy: DC.W 0x1100
+TEMP2: DC.W 0x1101
+
+resultant: DC.W 0x1106
+nextNumberToConvertBinToDecHigh: DC.W 0x1107
+nextNumberToConvertBinToDecLow: DC.W 0x1108
+TEMP1: DC.W 0x1109
+TEMP3: DC.W 0x110a
+AN00: DC.W 0x110b
+AN01: DC.W 0x110c
+BN00: DC.W 0x110d
+BN01: DC.W 0x110e
+ARG3: DC.W 0x110f
+ARG4: DC.W 0x1110
+ARG5: DC.W 0x1111
+RETURN0: DC.W 0x1112
+RETURN1: DC.W 0x1113
+RETURN2: DC.W 0x1114
+RETURN3: DC.W 0x1115
+
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
 GlobalPointerStart: DC.W 0x1000
-GlobalPointer: DC.W 0x1FFC
-GlobalPointerDirection: DC.W 0x1FFB
-// 0 == increment, 1 == decrement
+GlobalPointer: DC.W 0x10f3
+GlobalPointerDirection: DC.W 0x10f4
+takenumericalinputvalue: DC.W 0x10f0
+operandA: DC.W 0x1102
+operandB: DC.W 0x1103
+operatormamaybe: DC.W 0x1104
+operator: DC.W 0x1105
+stopmakingtempvars: DC.W 0x1322
 
-AXCopyForWrapper: DC.W 0x1FFA
-
-AXCOPY: DC.W 0x1FF8
-BXCOPY: DC.W 0x1FFD
-
-divisionbytentemplow: DC.W 0x1FF7
-divisionbytentemphighfinal: DC.W 0x1FF6
-
-32divhigh: DC.W 0x1DFF
-32divlow: DC.W 0x1DFE
-32divrem: DC.W 0x1DF7
-16divlow: DC.W 0x1DFB
-16divhigh: DC.W 0x1DFA
-16divrem: DC.W 0x1DF8
-copy: DC.W 0x1DF9
-
-TEMP2: DC.W 0x1DCA
-
-operandA: DC.W 0x1DCE
-operandB: DC.W 0x1DF6
-operatormamaybe: DC.W 0x1DCF
-operator: DC.W 0x1DC7
-resultant: DC.W 0x1DF4
-
-nextNumberToConvertBinToDecHigh: DC.W 0x1DE8
-nextNumberToConvertBinToDecLow: DC.W 0x1DE7
+NOP
 
 
-TEMP1: DC.W 0x1DF5
-TEMP3: DC.W 0x1DF3
-
-AN00: DC.W 0x1DF2
-AN01: DC.W 0x1DF1
-BN00: DC.W 0x1DF0
-BN01: DC.W 0x1DCB
-
-ARG3: DC.W 0x1DEF
-ARG4: DC.W 0x1DEE
-ARG5: DC.W 0x1DED
-
-
-RETURN0: DC.W 0x1DEC
-RETURN1: DC.W 0x1DEB
-RETURN2: DC.W 0x1DEA
-RETURN3: DC.W 0x1DE9
 
 // Output text begin here
 text0: DC.W 'P'
@@ -897,18 +1246,3 @@ text74: DC.W '5'
 text75: DC.W ':'
 text76: DC.W 0xA
 textendmarker: DC.W 0xFF
-
-youentered0: DC.W 'Y'
-youentered1: DC.W 'o'
-youentered2: DC.W 'u'
-youentered3: DC.W ' '
-youentered4: DC.W 'e'
-youentered5: DC.W 'n'
-youentered6: DC.W 't'
-youentered7: DC.W 'e'
-youentered8: DC.W 'r'
-youentered9: DC.W 'e'
-youentered10: DC.W 'd'
-youentered11: DC.W ':'
-youentered12: DC.W 0xA
-youenteredend: DC.W 0xFF

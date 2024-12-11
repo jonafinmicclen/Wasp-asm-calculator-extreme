@@ -4,7 +4,7 @@
 
 def generate(text_to_generate, name):
     num = 0
-    with open('generatedoutputtext.txt', 'w') as file:
+    with open(f'{name}.txt', 'w') as file:
         for char in text_to_generate:
             file.write(f'{name}{num}: DC.W \'{char}\'\n')
             num+=1
