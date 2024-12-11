@@ -1,0 +1,54 @@
+takenumericalinputvalue: DC.W 0x1FFF
+nextNumberToConvertBinToDec: DC.W 0x1FFE
+
+// Vars for 'array' or 'GlobalPointer'
+GlobalPointerStart: DC.W 0x1000
+GlobalPointer: DC.W 0x1FFC
+GlobalPointerDirection: DC.W 0x1FFB
+// 0 == increment, 1 == decrement
+
+AXCopyForWrapper: DC.W 0x1FFA
+
+AXCOPY: DC.W 0x1FF8
+BXCOPY: DC.W 0x1FFD
+
+divisionbytentemplow: DC.W 0x1FF7
+divisionbytentemphighfinal: DC.W 0x1FF6
+
+32divhigh: DC.W 0x1DFF
+32divlow: DC.W 0x1DFE
+32divrem: DC.W 0x1DF7
+16divlow: DC.W 0x1DFB
+16divhigh: DC.W 0x1DFA
+16divrem: DC.W 0x1DF8
+copy: DC.W 0x1DF9
+
+TEMP2: DC.W 0x1DCA
+
+operandA: DC.W 0x1DCE
+operandB: DC.W 0x1DF6
+operatormamaybe: DC.W 0x1DCF
+operator: DC.W 0x1DC7
+resultant: DC.W 0x1DF4
+
+nextNumberToConvertBinToDecHigh: DC.W 0x1DE8
+nextNumberToConvertBinToDecLow: DC.W 0x1DE7
+
+
+TEMP1: DC.W 0x1DF5
+TEMP3: DC.W 0x1DF3
+
+AN00: DC.W 0x1DF2
+AN01: DC.W 0x1DF1
+BN00: DC.W 0x1DF0
+BN01: DC.W 0x1DCB
+
+ARG3: DC.W 0x1DEF
+ARG4: DC.W 0x1DEE
+ARG5: DC.W 0x1DED
+
+
+RETURN0: DC.W 0x1DEC
+RETURN1: DC.W 0x1DEB
+RETURN2: DC.W 0x1DEA
+RETURN3: DC.W 0x1DE9
