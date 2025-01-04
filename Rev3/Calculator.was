@@ -109,7 +109,7 @@ MulDecomposedNumberByTenLoop:
 
 MOV AX, [decomposedSignificandPointer]
 MOV AX, [AX]
-MUL AX, 0x10
+MUL AX, 0xA
 POP BX
 ADD AX, BX
 
@@ -149,8 +149,8 @@ MUL BX, 0x10
 ADD AX, BX
 MOV BX, AX
 
-DIV AX, 0x10
-MOD BX, 0x10
+DIV AX, 0xA
+MOD BX, 0xA
 PUSH BX
 
 MOV BX, [decomposedSignificandPointer]
