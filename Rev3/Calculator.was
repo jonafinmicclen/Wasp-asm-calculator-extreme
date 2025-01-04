@@ -1,0 +1,191 @@
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+MOV AX, 0xFFFF
+MOV BX, 0x0
+CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL MulDecomposedNumberByTen
+HALT
+
+
+
+HALT
+
+AddAXToDecomposedNumberOffsettPointerBX:
+
+PUSH AX
+PUSH BX
+CALL ResetSignificandPointerToStart
+MOV AX, [decomposedSignificandPointer]
+POP BX 
+ADD AX, BX
+MOV [decomposedSignificandPointer], AX
+POP AX
+
+AddAXToDecomposedNumberLoop:
+
+CALL SplitAX
+
+PUSH AX
+
+MOV AX, [decomposedSignificandPointer]
+MOV AX, [AX]
+ADD AX, BX
+
+CALL SplitAX
+
+PUSH AX
+
+MOV AX, [decomposedSignificandPointer]
+MOV [AX], BX
+
+POP AX
+POP BX
+
+ADD AX, BX
+CALL IncrementPointerBX
+
+CMP AX, 0x0
+JNE AddAXToDecomposedNumberLoop
+
+MOV AX, [decomposedSignificandPointer]
+MOV [significandEndVariable], AX
+
+RET
+
+
+
+MulDecomposedNumberByTen:
+
+CALL ResetSignificandPointerToStart
+MOV BX, 0x0
+PUSH BX
+
+MulDecomposedNumberByTenLoop:
+
+MOV AX, [decomposedSignificandPointer]
+MOV AX, [AX]
+MUL AX, 0xA
+POP BX
+ADD AX, BX
+
+CALL SplitAX
+PUSH AX
+
+MOV AX, [decomposedSignificandPointer]
+MOV [AX], BX
+
+CALL IncrementPointerBX
+
+MOV AX, [decomposedSignificandPointer]
+MOV BX, [significandEndVariable]
+INC BX
+CMP AX, BX
+JL MulDecomposedNumberByTenLoop
+
+POP AX
+RET
+
+
+
+DivAXByDecomposedNumberResultAXRemBX:
+
+RET
+
+ResetSignificandPointerToStart:
+MOV BX, [significandStartConstant]
+MOV [decomposedSignificandPointer], BX
+RET
+
+IncrementPointerBX:
+MOV BX, [decomposedSignificandPointer]
+INC BX
+MOV [decomposedSignificandPointer], BX
+RET
+
+DecrementPointerBX:
+MOV BX, [decomposedSignificandPointer]
+DEC BX
+MOV [decomposedSignificandPointer], BX
+RET
+
+SplitAX:
+
+MOV BX, AX
+
+//BX
+MOV [AXCOPY], AX
+MOV AX, 0x00FF
+AND BX, AX
+MOV AX, [AXCOPY]
+
+//AX
+SUB AX, BX
+QSR AX
+QSR AX
+
+// WASP SHR BUG FIX START
+MOV [BXCOPY], BX
+MOV BX, 0x00FF
+AND AX, BX
+MOV BX, [BXCOPY]
+// WASP SHR BUG FIX END
+// Result, AX contains 0x**00 >> 8, BX contains 0x00** 
+RET
+
+Return:
+RET
+
+Temp: DC.W 0x0
+decomposedSignificandPointer: DC.W 0x0
+significandStartConstant: DC.W 0x1000
+significandEndVariable: DC.W 0x0
+exponentOfDecomposedTwosCompliment: DC.W 0x0
+signOfDecomposed: DC.W 0x0
+AXCOPY: DC.W 0x0
+BXCOPY: DC.W 0x0
