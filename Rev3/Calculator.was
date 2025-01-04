@@ -50,11 +50,10 @@ MOV AX, 0xFFFF
 MOV BX, 0x0
 CALL AddAXToDecomposedNumberOffsettPointerBX
 CALL MulDecomposedNumberByTen
+CALL DivDecomposedNumberByTenRemInAX
 HALT
 
 
-
-HALT
 
 AddAXToDecomposedNumberOffsettPointerBX:
 
@@ -110,7 +109,7 @@ MulDecomposedNumberByTenLoop:
 
 MOV AX, [decomposedSignificandPointer]
 MOV AX, [AX]
-MUL AX, 0xA
+MUL AX, 0x10
 POP BX
 ADD AX, BX
 
@@ -127,20 +126,61 @@ MOV BX, [significandEndVariable]
 INC BX
 CMP AX, BX
 JL MulDecomposedNumberByTenLoop
+MOV [significandEndVariable], AX
+POP AX
+RET
+
+
+
+DivDecomposedNumberByTenRemInAX:
+
+CALL ResetSignificandPointerToEnd
+MOV BX, 0x0
+PUSH BX
+
+DivDecomposedNumberByTenRemInAXLoop:
+
+MOV AX, [decomposedSignificandPointer]
+MOV AX, [AX]
+
+POP BX
+MUL BX, 0x10
+MUL BX, 0x10
+ADD AX, BX
+MOV BX, AX
+
+DIV AX, 0x10
+MOD BX, 0x10
+PUSH BX
+
+MOV BX, [decomposedSignificandPointer]
+MOV [BX], AX
+
+CALL DecrementPointerBX
+
+MOV AX, [decomposedSignificandPointer]
+MOV BX, [significandStartConstant]
+CMP AX, BX
+JGE DivDecomposedNumberByTenRemInAXLoop
 
 POP AX
 RET
 
 
 
-DivAXByDecomposedNumberResultAXRemBX:
-
-RET
-
 ResetSignificandPointerToStart:
 MOV BX, [significandStartConstant]
 MOV [decomposedSignificandPointer], BX
 RET
+
+
+
+ResetSignificandPointerToEnd:
+MOV BX, [significandEndVariable]
+MOV [decomposedSignificandPointer], BX
+RET
+
+
 
 IncrementPointerBX:
 MOV BX, [decomposedSignificandPointer]
@@ -148,21 +188,25 @@ INC BX
 MOV [decomposedSignificandPointer], BX
 RET
 
+
+
 DecrementPointerBX:
 MOV BX, [decomposedSignificandPointer]
 DEC BX
 MOV [decomposedSignificandPointer], BX
 RET
 
+
+
 SplitAX:
 
 MOV BX, AX
 
 //BX
-MOV [AXCOPY], AX
+PUSH AX
 MOV AX, 0x00FF
 AND BX, AX
-MOV AX, [AXCOPY]
+POP AX
 
 //AX
 SUB AX, BX
@@ -170,10 +214,10 @@ QSR AX
 QSR AX
 
 // WASP SHR BUG FIX START
-MOV [BXCOPY], BX
+PUSH BX
 MOV BX, 0x00FF
 AND AX, BX
-MOV BX, [BXCOPY]
+POP BX
 // WASP SHR BUG FIX END
 // Result, AX contains 0x**00 >> 8, BX contains 0x00** 
 RET
@@ -181,11 +225,10 @@ RET
 Return:
 RET
 
-Temp: DC.W 0x0
+
+
 decomposedSignificandPointer: DC.W 0x0
 significandStartConstant: DC.W 0x1000
 significandEndVariable: DC.W 0x0
 exponentOfDecomposedTwosCompliment: DC.W 0x0
 signOfDecomposed: DC.W 0x0
-AXCOPY: DC.W 0x0
-BXCOPY: DC.W 0x0
