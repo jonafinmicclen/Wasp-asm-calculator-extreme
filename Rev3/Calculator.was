@@ -1,78 +1,78 @@
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
+CALL AddAXToFragmentedNumberOffsettPointerBX
 MOV AX, 0xFFFF
 MOV BX, 0x0
-CALL AddAXToDecomposedNumberOffsettPointerBX
-CALL MulDecomposedNumberByTen
-CALL DivDecomposedNumberByTenRemInAX
+CALL AddAXToFragmentedNumberOffsettPointerBX
+CALL MulFragmentedNumberByTen
+CALL DivFragmentedNumberByTenRemInAX
 HALT
 
 
 
-AddAXToDecomposedNumberOffsettPointerBX:
+AddAXToFragmentedNumberOffsettPointerBX:
 
 PUSH AX
 PUSH BX
 CALL ResetSignificandPointerToStart
-MOV AX, [decomposedSignificandPointer]
+MOV AX, [fragmentedSignificandPointer]
 POP BX 
 ADD AX, BX
-MOV [decomposedSignificandPointer], AX
+MOV [fragmentedSignificandPointer], AX
 POP AX
 
-AddAXToDecomposedNumberLoop:
+AddAXToFragmentedNumberLoop:
 
 CALL SplitAX
 
 PUSH AX
 
-MOV AX, [decomposedSignificandPointer]
+MOV AX, [fragmentedSignificandPointer]
 MOV AX, [AX]
 ADD AX, BX
 
@@ -80,7 +80,7 @@ CALL SplitAX
 
 PUSH AX
 
-MOV AX, [decomposedSignificandPointer]
+MOV AX, [fragmentedSignificandPointer]
 MOV [AX], BX
 
 POP AX
@@ -90,24 +90,24 @@ ADD AX, BX
 CALL IncrementPointerBX
 
 CMP AX, 0x0
-JNE AddAXToDecomposedNumberLoop
+JNE AddAXToFragmentedNumberLoop
 
-MOV AX, [decomposedSignificandPointer]
+MOV AX, [fragmentedSignificandPointer]
 MOV [significandEndVariable], AX
 
 RET
 
 
 
-MulDecomposedNumberByTen:
+MulFragmentedNumberByTen:
 
 CALL ResetSignificandPointerToStart
 MOV BX, 0x0
 PUSH BX
 
-MulDecomposedNumberByTenLoop:
+MulFragmentedNumberByTenLoop:
 
-MOV AX, [decomposedSignificandPointer]
+MOV AX, [fragmentedSignificandPointer]
 MOV AX, [AX]
 MUL AX, 0xA
 POP BX
@@ -116,31 +116,31 @@ ADD AX, BX
 CALL SplitAX
 PUSH AX
 
-MOV AX, [decomposedSignificandPointer]
+MOV AX, [fragmentedSignificandPointer]
 MOV [AX], BX
 
 CALL IncrementPointerBX
 
-MOV AX, [decomposedSignificandPointer]
+MOV AX, [fragmentedSignificandPointer]
 MOV BX, [significandEndVariable]
 INC BX
 CMP AX, BX
-JL MulDecomposedNumberByTenLoop
+JL MulFragmentedNumberByTenLoop
 MOV [significandEndVariable], AX
 POP AX
 RET
 
 
 
-DivDecomposedNumberByTenRemInAX:
+DivFragmentedNumberByTenRemInAX:
 
 CALL ResetSignificandPointerToEnd
 MOV BX, 0x0
 PUSH BX
 
-DivDecomposedNumberByTenRemInAXLoop:
+DivFragmentedNumberByTenRemInAXLoop:
 
-MOV AX, [decomposedSignificandPointer]
+MOV AX, [fragmentedSignificandPointer]
 MOV AX, [AX]
 
 POP BX
@@ -153,15 +153,15 @@ DIV AX, 0xA
 MOD BX, 0xA
 PUSH BX
 
-MOV BX, [decomposedSignificandPointer]
+MOV BX, [fragmentedSignificandPointer]
 MOV [BX], AX
 
 CALL DecrementPointerBX
 
-MOV AX, [decomposedSignificandPointer]
+MOV AX, [fragmentedSignificandPointer]
 MOV BX, [significandStartConstant]
 CMP AX, BX
-JGE DivDecomposedNumberByTenRemInAXLoop
+JGE DivFragmentedNumberByTenRemInAXLoop
 
 POP AX
 RET
@@ -170,30 +170,30 @@ RET
 
 ResetSignificandPointerToStart:
 MOV BX, [significandStartConstant]
-MOV [decomposedSignificandPointer], BX
+MOV [fragmentedSignificandPointer], BX
 RET
 
 
 
 ResetSignificandPointerToEnd:
 MOV BX, [significandEndVariable]
-MOV [decomposedSignificandPointer], BX
+MOV [fragmentedSignificandPointer], BX
 RET
 
 
 
 IncrementPointerBX:
-MOV BX, [decomposedSignificandPointer]
+MOV BX, [fragmentedSignificandPointer]
 INC BX
-MOV [decomposedSignificandPointer], BX
+MOV [fragmentedSignificandPointer], BX
 RET
 
 
 
 DecrementPointerBX:
-MOV BX, [decomposedSignificandPointer]
+MOV BX, [fragmentedSignificandPointer]
 DEC BX
-MOV [decomposedSignificandPointer], BX
+MOV [fragmentedSignificandPointer], BX
 RET
 
 
@@ -227,8 +227,8 @@ RET
 
 
 
-decomposedSignificandPointer: DC.W 0x0
+fragmentedSignificandPointer: DC.W 0x0
 significandStartConstant: DC.W 0x1000
 significandEndVariable: DC.W 0x0
-exponentOfDecomposedTwosCompliment: DC.W 0x0
-signOfDecomposed: DC.W 0x0
+exponentOfFragmentedTwosCompliment: DC.W 0x0
+signOfFragmented: DC.W 0x0
