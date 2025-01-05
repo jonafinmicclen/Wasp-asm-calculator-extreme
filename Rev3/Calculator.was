@@ -1,60 +1,14 @@
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-MOV AX, 0xFFFF
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
-CALL MulFragmentedNumberByTen
-CALL DivFragmentedNumberByTenRemInAX
+MOV AX, taaa
+MOV BX, 0x5
+CALL AddFragToOtherFragPtrInAXLengthInBX
+MOV AX, taaa
+MOV BX, 0x5
+CALL AddFragToOtherFragPtrInAXLengthInBX
 HALT
 
 
 
+// Must ensure this function correctly updates the length of freagmenteed nubmer
 AddAXToFragmentedNumberOffsettPointerBX:
 
 PUSH AX
@@ -168,6 +122,48 @@ RET
 
 
 
+// Untested takes pointer to start of a fragmented number and adds it to the currently loaded fragmented number
+AddFragToOtherFragPtrInAXLengthInBX:
+
+// Reset iteration counter to 0 while maintaining AX
+PUSH AX
+MOV AX, 0x0
+MOV [TempAddFragToOtherFragPtrInBXLengthInAXIteration], AX
+POP AX
+
+// Convert length to end address of number, Decrement BX as 0 counts as one
+ADD BX, AX
+
+AddFragToOtherFragPtrInAXLengthInBXLoop:
+
+// Store pointer and end address for loop end condition
+PUSH AX
+PUSH BX
+
+// Add current fragment to loaded fragment
+MOV AX, [AX]
+MOV BX, [TempAddFragToOtherFragPtrInBXLengthInAXIteration]
+CALL AddAXToFragmentedNumberOffsettPointerBX
+
+// Increment interation counter
+MOV BX, [TempAddFragToOtherFragPtrInBXLengthInAXIteration]
+INC BX
+MOV [TempAddFragToOtherFragPtrInBXLengthInAXIteration], BX
+
+// Retrieve pointer and end address
+POP BX
+POP AX
+// Increment pointer
+INC AX
+// Check if pointer is at end of number
+CMP AX, BX
+
+JL AddFragToOtherFragPtrInAXLengthInBXLoop
+
+RET
+
+
+
 ResetSignificandPointerToStart:
 MOV BX, [significandStartConstant]
 MOV [fragmentedSignificandPointer], BX
@@ -232,3 +228,5 @@ significandStartConstant: DC.W 0x1000
 significandEndVariable: DC.W 0x0
 exponentOfFragmentedTwosCompliment: DC.W 0x0
 signOfFragmented: DC.W 0x0
+
+TempAddFragToOtherFragPtrInBXLengthInAXIteration: DC.W 0x0
