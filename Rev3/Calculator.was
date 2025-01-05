@@ -4,6 +4,13 @@ CALL AddFragToOtherFragPtrInAXLengthInBX
 MOV AX, taaa
 MOV BX, 0x5
 CALL AddFragToOtherFragPtrInAXLengthInBX
+CALL CopyFragmentedNumber
+MOV AX, [immutableFragCopyStartPointer]
+MOV BX, [immutableFragCopyLength]
+INC BX
+CALL AddFragToOtherFragPtrInAXLengthInBX
+CALL GetFragmentedNumberLengthInMemoryIntoAX
+MOV BX, [immutableFragCopyLength]
 HALT
 
 
@@ -164,6 +171,53 @@ RET
 
 
 
+// Use variable to access location of copied number, COPPIED NUMBER IS IMMUTABLE
+CopyFragmentedNumber:
+
+CALL ResetSignificandPointerToStart
+CALL GetFragmentedNumberLengthInMemoryIntoAX
+MOV [immutableFragCopyLength], BX
+MOV BX, [fragmentedSignificandPointer]
+SUB BX, AX
+DEC BX
+MOV AX, BX
+MOV [immutableFragCopyStartPointer], AX
+// AX Contains start of the IMMUTABLE copy
+
+CopyFragmentedNumberLoop:
+
+MOV BX, [fragmentedSignificandPointer]
+MOV BX, [BX]
+MOV [AX], BX
+INC AX
+
+CALL IncrementPointerBX
+
+MOV BX, [significandStartConstant]
+CMP AX, BX 
+JL CopyFragmentedNumberLoop
+
+PUSH AX
+Call GetFragmentedNumberLengthInMemoryIntoAX
+POP BX
+SUB BX, AX
+DEC BX
+
+RET
+
+
+
+GetFragmentedNumberLengthInMemoryIntoAX:
+
+MOV AX, [significandStartConstant]
+MOV BX, [significandEndVariable]
+SUB BX, AX
+MOV AX, BX
+
+RET
+
+
+
 ResetSignificandPointerToStart:
 MOV BX, [significandStartConstant]
 MOV [fragmentedSignificandPointer], BX
@@ -229,4 +283,13 @@ significandEndVariable: DC.W 0x0
 exponentOfFragmentedTwosCompliment: DC.W 0x0
 signOfFragmented: DC.W 0x0
 
+immutableFragCopyStartPointer: DC.W 0x0
+immutableFragCopyLength: DC.W 0x0
+
 TempAddFragToOtherFragPtrInBXLengthInAXIteration: DC.W 0x0
+
+taaa: DC.W 0xFF
+tana: DC.W 0xFF
+taba: DC.W 0xFF
+tada: DC.W 0xFF
+taea: DC.W 0xFF
