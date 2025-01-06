@@ -1,3 +1,8 @@
+start:
+CALL ReadNext
+JMP start
+HALT
+
 MOV AX, taaa
 MOV BX, 0x5
 CALL AddFragToOtherFragPtrInAXLengthInBX
@@ -15,7 +20,7 @@ HALT
 
 
 
-// Must ensure this function correctly updates the length of freagmenteed nubmer
+// Must ensure this function correctly updates the length of fragmented nubmer
 AddAXToFragmentedNumberOffsettPointerBX:
 
 PUSH AX
@@ -246,6 +251,67 @@ DEC BX
 MOV [fragmentedSignificandPointer], BX
 RET
 
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
 
 
 SplitAX:
@@ -276,6 +342,57 @@ Return:
 RET
 
 
+// Reads next char, ignores enter
+ReadNext:
+
+// Wait for ready flag
+MOV AX, [0x00F5]
+CMP AX, 0x0
+JEQ ReadNext
+
+// Read char
+MOV AX, [0x00F3]
+
+// Switch ready flag
+MOV BX, 0x00F5
+MOV [BX], 0x0
+
+MOV BX, AX
+
+// Ensure character is not enter
+CMP BX, 0xA
+JEQ ReadNext
+
+// Check if last two characters are xx
+CMP BX, 'x'
+JNE NotX
+// IF X
+
+// Check if last was X if not return
+MOV BX, [lastCharX]
+CMP BX, 0x1
+JNE NotLastCharX
+HALT
+NotLastCharX:
+
+MOV BX, 0x1
+MOV [lastCharX], BX
+
+RET
+
+// ELSE reset lastCharX flag then return
+NotX:
+MOV BX, 0x0
+MOV [lastCharX], BX
+
+RET
+
+
+
+End:
+HALT
+
+
 
 fragmentedSignificandPointer: DC.W 0x0
 significandStartConstant: DC.W 0x1000
@@ -287,6 +404,8 @@ immutableFragCopyStartPointer: DC.W 0x0
 immutableFragCopyLength: DC.W 0x0
 
 TempAddFragToOtherFragPtrInBXLengthInAXIteration: DC.W 0x0
+
+lastCharX: DC.W 0x0
 
 taaa: DC.W 0xFF
 tana: DC.W 0xFF
