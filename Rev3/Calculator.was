@@ -1,6 +1,24 @@
 start:
-CALL ReadNext
-JMP start
+MOV AX, 0xA
+MOV BX, 0x0
+CALL AddAXToFragmentedNumberOffsettPointerBX
+CALL MulFragmentedNumberByTen
+CALL MulFragmentedNumberByTen
+CALL MulFragmentedNumberByTen
+CALL MulFragmentedNumberByTen
+CALL MulFragmentedNumberByTen
+CALL MulFragmentedNumberByTen
+CALL MulFragmentedNumberByTen
+CALL MulFragmentedNumberByTen
+CALL MulFragmentedNumberByTen
+MOV AX, 0x9
+MOV BX, 0x0
+CALL AddAXToFragmentedNumberOffsettPointerBX
+MOV AX, 0x1
+MOV BX, 0x0
+CALL AddAXToFragmentedNumberOffsettPointerBX
+HALT
+
 HALT
 
 MOV AX, taaa
@@ -314,6 +332,7 @@ NOP
 NOP
 
 
+
 SplitAX:
 
 MOV BX, AX
@@ -338,8 +357,6 @@ POP BX
 // Result, AX contains 0x**00 >> 8, BX contains 0x00** 
 RET
 
-Return:
-RET
 
 
 // Reads next char, ignores enter
@@ -368,13 +385,14 @@ CMP BX, 'x'
 JNE NotX
 // IF X
 
-// Check if last was X if not return
+// Halt IF LastCharX
 MOV BX, [lastCharX]
 CMP BX, 0x1
 JNE NotLastCharX
 HALT
 NotLastCharX:
 
+// Update LastCharX flag
 MOV BX, 0x1
 MOV [lastCharX], BX
 
@@ -389,8 +407,55 @@ RET
 
 
 
-End:
-HALT
+InputNumberToFrag:
+
+CALL ReadNext
+
+PUSH AX
+CALL IsNumeric 
+CMP AX, 0x0
+JEQ IfNotNumeric
+POP AX
+
+// Convert to numerical value
+PUSH AX
+CALL MulFragmentedNumberByTen
+POP AX
+SUB AX, '0'
+MOV BX, 0x0
+CALL AddAXToFragmentedNumberOffsettPointerBX
+
+IfNotNumeric:
+CMP AX, '='
+JEQ Return
+
+JMP InputNumberToFrag
+
+
+
+// Input in AX bool return in AX
+IsNumeric:
+
+CMP AX, '0'
+JGE MoreThanOrEqualToZero
+MOV AX, 0x0
+RET
+MoreThanOrEqualToZero:
+
+MOV BX, '9'
+CMP BX, AX
+JGE LessThanOrEqualToNine
+MOV AX, 0x0
+RET
+LessThanOrEqualToNine:
+
+MOV AX, 0x1
+
+RET
+
+
+Return:
+RET
 
 
 
