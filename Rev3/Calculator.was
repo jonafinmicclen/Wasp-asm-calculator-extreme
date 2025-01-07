@@ -1,61 +1,25 @@
 start:
-
+CALL ResetFragmentedNumberToZero
 CALL InputNumberToFrag
-HALT
-MOV AX, 0x1
-CALL PushDigitInAXIntoFrag
-MOV AX, 0x6
-CALL PushDigitInAXIntoFrag
-MOV AX, 0x7
-CALL PushDigitInAXIntoFrag
-MOV AX, 0x7
-CALL PushDigitInAXIntoFrag
-MOV AX, 0x7
-CALL PushDigitInAXIntoFrag
-MOV AX, 0x2
-CALL PushDigitInAXIntoFrag
-MOV AX, 0x1
-CALL PushDigitInAXIntoFrag
-MOV AX, 0x5
-CALL PushDigitInAXIntoFrag
 
-HALT
+MOV AX, 0x200
+CALL CopyFragmentedNumberToAddressInAXEndFlagged
 
-MOV AX, 0x5
-PUSH AX
-CALL MulFragmentedNumberByTen
-POP AX
-MOV BX, 0x0
-CALL AddAXToFragmentedNumberOffsettPointerBX
+CALL ResetFragmentedNumberToZero
+CALL InputNumberToFrag
+
+MOV AX, 0x200
+CALL AddFragAtAXToFrag
+
+CALL PrintFragmentedNumber
+
+JMP start
 
 
 
-HALT
+// If any bugs happen make sure a function using the pointer doesn't call another also using the pointer
 
-
-
-HALT
-
-HALT
-
-MOV AX, taaa
-MOV BX, 0x5
-CALL AddFragToOtherFragPtrInAXLengthInBX
-MOV AX, taaa
-MOV BX, 0x5
-CALL AddFragToOtherFragPtrInAXLengthInBX
-CALL CopyFragmentedNumber
-MOV AX, [immutableFragCopyStartPointer]
-MOV BX, [immutableFragCopyLength]
-INC BX
-CALL AddFragToOtherFragPtrInAXLengthInBX
-CALL GetFragmentedNumberLengthInMemoryIntoAX
-MOV BX, [immutableFragCopyLength]
-HALT
-
-
-
-// Must ensure this function correctly updates the length of fragmented nubmer
+// Must ensure this function correctly updates the length of fragmented nubmer, I think it does now that i fixed it ..
 AddAXToFragmentedNumberOffsettPointerBX:
 
 PUSH AX
@@ -235,7 +199,7 @@ RET
 CopyFragmentedNumber:
 
 CALL ResetSignificandPointerToStart
-CALL GetFragmentedNumberLengthInMemoryIntoAX
+CALL GetFragmentedNumberLengthInMemoryIntoBX
 MOV [immutableFragCopyLength], BX
 MOV BX, [fragmentedSignificandPointer]
 SUB BX, AX
@@ -258,7 +222,7 @@ CMP AX, BX
 JL CopyFragmentedNumberLoop
 
 PUSH AX
-Call GetFragmentedNumberLengthInMemoryIntoAX
+Call GetFragmentedNumberLengthInMemoryIntoBX
 POP BX
 SUB BX, AX
 DEC BX
@@ -266,8 +230,39 @@ DEC BX
 RET
 
 
+// Use variable to access location of copied number, COPPIED NUMBER IS IMMUTABLE
+CopyFragmentedNumberToAddressInAXEndFlagged:
+
+PUSH AX
+CALL ResetSignificandPointerToStart
+CALL GetFragmentedNumberLengthInMemoryIntoBX
+POP AX
+ADD BX, AX
+
+CopyFragmentedNumberToAddressInAXEndFlaggedLoop:
+PUSH BX
+PUSH AX
+
+MOV BX, [fragmentedSignificandPointer]
+MOV BX, [BX]
+MOV [AX], BX
+
+CALL IncrementPointerBX
+CALL GetFragmentedNumberLengthInMemoryIntoBX
+POP AX
+POP BX
+INC AX
+
+CMP BX, AX
+JGE CopyFragmentedNumberToAddressInAXEndFlaggedLoop
+
+// End flag is abcd
+MOV [AX], 0xABCD
+
+RET
 
 
+
 NOP
 NOP
 NOP
@@ -331,7 +326,7 @@ NOP
 NOP
 
 
-GetFragmentedNumberLengthInMemoryIntoAX:
+GetFragmentedNumberLengthInMemoryIntoBX:
 
 MOV AX, [significandStartConstant]
 MOV BX, [significandEndVariable]
@@ -521,6 +516,116 @@ MOV AX, significandEndVariable
 MOV [AX], BX
 
 RET
+
+
+
+PrintChar:
+MOV [0xF0], AX
+MOV AX, 0x0001
+MOV [0xF2], AX
+PrintCharLoop:
+MOV AX, [0x00F2]
+CMP AX, 0x1
+JEQ PrintCharLoop
+RET
+
+
+// Kinda gross use of stack but its perfect
+PrintFragmentedNumber:
+
+// This is end flag for printing number
+MOV AX, 0xABCD
+PUSH AX
+
+PrintFragmentedNumberLoopFirst:
+
+// Div frag by ten and push Remainder
+CALL DivFragmentedNumberByTenRemInAX
+ADD AX, '0'
+PUSH AX
+
+// Increment and end condition
+CALL IsFragmentedNumberZero
+CMP AX, 0x1
+JNE PrintFragmentedNumberLoopFirst
+
+PrintFragmentedNumberLoopSecond:
+
+POP AX
+PUSH AX
+CALL PrintChar
+POP AX
+MOV BX, 0xABCD
+CMP AX, BX
+JNE PrintFragmentedNumberLoopSecond
+
+RET
+
+
+
+IsFragmentedNumberZero:
+
+CALL ResetSignificandPointerToStart
+
+IsFragmentedNumberZeroLoop:
+
+MOV BX, [fragmentedSignificandPointer]
+MOV AX, [BX]
+CMP AX, 0x0
+JNE NotZero
+
+CALL IncrementPointerBX
+MOV AX, [fragmentedSignificandPointer]
+MOV BX, [significandEndVariable]
+CMP BX, AX
+JGE IsFragmentedNumberZeroLoop
+
+MOV AX, 0x1
+RET
+
+NotZero:
+MOV AX, 0x0
+RET
+
+
+
+AddFragAtAXToFrag:
+
+// Ax contains start of frag to add from, end of this frag is indicated by abcd
+// BX will be iteration counter
+MOV BX, 0x0
+
+AddFragAtAXToFragLoop:
+
+PUSH AX
+PUSH BX
+
+MOV AX, [AX]
+MOV BX, 0xABCD
+CMP AX, BX
+JEQ AddFragAtAXToFragLoopEnd
+
+POP BX
+PUSH BX
+
+CALL AddAXToFragmentedNumberOffsettPointerBX
+
+POP BX
+POP AX
+
+INC AX
+INC BX
+
+JMP AddFragAtAXToFragLoop
+
+AddFragAtAXToFragLoopEnd:
+
+//Cleanup stack
+POP AX
+POP BX
+
+RET
+
 
 
 
