@@ -549,17 +549,20 @@ CALL IsFragmentedNumberZero
 CMP AX, 0x1
 JNE PrintFragmentedNumberLoopFirst
 
+MOV BX, 0xABCD
+
 PrintFragmentedNumberLoopSecond:
 
 POP AX
+
+CMP AX, BX
+JEQ Return
+
 PUSH AX
 CALL PrintChar
 POP AX
-MOV BX, 0xABCD
-CMP AX, BX
-JNE PrintFragmentedNumberLoopSecond
 
-RET
+JMP PrintFragmentedNumberLoopSecond
 
 
 
