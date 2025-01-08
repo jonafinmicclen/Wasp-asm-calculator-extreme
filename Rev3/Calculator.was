@@ -1,19 +1,27 @@
-start:
+Main:
 CALL ResetFragmentedNumberToZero
 CALL InputNumberToFrag
 
+MOV AX, [operator]
+CMP AX, '+'
+JEQ MainHandleAddition
+
+// error alert, shouldnt reach here
+MOV AX, 0xABCD
+MOV AX, 0xABCD
+HALT
+
+MainHandleAddition:
 MOV AX, 0x200
 CALL CopyFragmentedNumberToAddressInAXEndFlagged
-
 CALL ResetFragmentedNumberToZero
 CALL InputNumberToFrag
-
 MOV AX, 0x200
 CALL AddFragAtAXToFrag
-
 CALL PrintFragmentedNumber
-
-JMP start
+MOV AX, 0xA
+CALL PrintChar
+JMP Main
 
 
 
@@ -445,12 +453,15 @@ RET
 InputNumberToFrag:
 
 CALL ReadNext
+// Push for end condition functions modifiying ax
 PUSH AX
 
+// End condition
 CALL IsAXNumeric
 CMP AX, 0x0
 JEQ IfNotNumeric
 
+// Add digit to frag
 POP AX
 SUB AX, '0'
 CALL PushDigitInAXIntoFrag
@@ -459,10 +470,22 @@ JMP InputNumberToFrag
 
 IfNotNumeric:
 POP AX
+
+// Store potential operator for later
+MOV [operator], AX
+
+// Check its an operator
+CMP AX, '+'
+JEQ Return
 CMP AX, '='
 JEQ Return
 
-JMP InputNumberToFrag
+// Add 'this operator not recognised' error message here
+// Debug message abcd
+MOV AX, 0xABCD
+MOV BX, 0xABCD
+HALT
+RET
 
 
 
@@ -645,6 +668,8 @@ TempAddFragToOtherFragPtrInBXLengthInAXIteration: DC.W 0x0
 MulFragmentedNumberByTenIterations: DC.W 0x0
 
 lastCharX: DC.W 0x0
+
+operator: DC.W 0x0
 
 taaa: DC.W 0xFF
 tana: DC.W 0xFF
