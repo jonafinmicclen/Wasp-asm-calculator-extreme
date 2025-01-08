@@ -699,7 +699,7 @@ MOV AX, [BX]
 CMP AX, 0xFF
 JEQ return
 CALL printchar
-ADD BX, 0x1
+INC BX
 JMP outputTextFromMemory
 
 

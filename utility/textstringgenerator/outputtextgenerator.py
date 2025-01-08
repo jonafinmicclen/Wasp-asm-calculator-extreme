@@ -11,4 +11,4 @@ def generate(text_to_generate, name):
             
 # 'Please enter your expression in the format "a+b=" max input number is 65535:\n'
 
-generate('You entered:\n', 'youentered')
+generate('Please enter an expression the format\na+b=\nChange the operator', 'enterExpressionPrompt')

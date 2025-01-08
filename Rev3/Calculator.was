@@ -1,23 +1,43 @@
 Main:
+// Initialise/reset variables
 CALL ResetFragmentedNumberToZero
+
+// Print message
+MOV BX, enterExpressionPrompt
+CALL PrintTextFromMemory
+
+// Take inputs
 CALL InputNumberToFrag
 
 MOV AX, [operator]
 CMP AX, '+'
 JEQ MainHandleAddition
+CMP AX, '-'
+JEQ MainHandleSubtraction
 
-// error alert, shouldnt reach here
-MOV AX, 0xABCD
-MOV AX, 0xABCD
+MOV BX, unexpectedError
+CALL PrintTextFromMemory
 HALT
 
 MainHandleAddition:
-MOV AX, 0x200
+MOV AX, 0x400
 CALL CopyFragmentedNumberToAddressInAXEndFlagged
 CALL ResetFragmentedNumberToZero
 CALL InputNumberToFrag
-MOV AX, 0x200
+MOV AX, 0x400
 CALL AddFragAtAXToFrag
+CALL PrintFragmentedNumber
+MOV AX, 0xA
+CALL PrintChar
+JMP Main
+
+MainHandleSubtraction:
+MOV AX, 0x400
+CALL CopyFragmentedNumberToAddressInAXEndFlagged
+CALL ResetFragmentedNumberToZero
+CALL InputNumberToFrag
+MOV AX, 0x400
+CALL SubFragAtAXToFrag
 CALL PrintFragmentedNumber
 MOV AX, 0xA
 CALL PrintChar
@@ -419,6 +439,12 @@ MOV [BX], 0x0
 
 MOV BX, AX
 
+PUSH AX
+PUSH BX
+CALL PrintChar
+POP BX
+POP AX
+
 // Ensure character is not enter
 CMP BX, 0xA
 JEQ ReadNext
@@ -477,15 +503,16 @@ MOV [operator], AX
 // Check its an operator
 CMP AX, '+'
 JEQ Return
+CMP AX, '-'
+JEQ Return
 CMP AX, '='
 JEQ Return
 
-// Add 'this operator not recognised' error message here
-// Debug message abcd
-MOV AX, 0xABCD
-MOV BX, 0xABCD
-HALT
-RET
+// Unrecognised operator
+MOV BX, unrecognisedOperator
+CALL PrintTextFromMemory
+// Restart due to error
+JMP Main
 
 
 
@@ -615,6 +642,43 @@ RET
 
 
 
+SubFragAtAXToFrag:
+
+// Ax contains start of frag to add from, end of this frag is indicated by abcd
+// BX will be iteration counter
+MOV BX, 0x0
+
+SubFragAtAXToFragLoop:
+
+PUSH AX
+PUSH BX
+
+MOV AX, [AX]
+MOV BX, 0xABCD
+CMP AX, BX
+JEQ SubFragAtAXToFragLoopEnd
+
+POP BX
+PUSH BX
+
+CALL SubAXToFragmentedNumberOffsettPointerBX
+
+POP BX
+POP AX
+
+INC AX
+INC BX
+
+JMP SubFragAtAXToFragLoop
+
+SubFragAtAXToFragLoopEnd:
+
+//Cleanup stack
+POP AX
+POP BX
+
+RET
+
 AddFragAtAXToFrag:
 
 // Ax contains start of frag to add from, end of this frag is indicated by abcd
@@ -653,6 +717,23 @@ POP BX
 RET
 
 
+// Put pointer to start of text in BX, End flag is 0xFF
+PrintTextFromMemory:
+MOV AX, [BX]
+CMP AX, 0xFF
+JEQ Return
+PUSH BX
+CALL PrintChar
+POP BX
+INC BX
+JMP PrintTextFromMemory
+
+AddAXToFragmentedNumberOffsettPointerBX:
+MOV BX, unrecognisedOperator
+CALL PrintTextFromMemory
+JMP Main
+// need to finish this function for subtraction
+
 
 
 fragmentedSignificandPointer: DC.W 0x0
@@ -676,3 +757,107 @@ tana: DC.W 0xFF
 taba: DC.W 0xFF
 tada: DC.W 0xFF
 taea: DC.W 0xFF
+
+unexpectedError: DC.W 'A'
+unexpectedError1: DC.W 'n'
+unexpectedError2: DC.W ' '
+unexpectedError3: DC.W 'u'
+unexpectedError4: DC.W 'n'
+unexpectedError5: DC.W 'e'
+unexpectedError6: DC.W 'x'
+unexpectedError7: DC.W 'p'
+unexpectedError8: DC.W 'e'
+unexpectedError9: DC.W 'c'
+unexpectedError10: DC.W 't'
+unexpectedError11: DC.W 'e'
+unexpectedError12: DC.W 'd'
+unexpectedError13: DC.W ' '
+unexpectedError14: DC.W 'e'
+unexpectedError15: DC.W 'r'
+unexpectedError16: DC.W 'r'
+unexpectedError17: DC.W 'o'
+unexpectedError18: DC.W 'r'
+unexpectedError19: DC.W ' '
+unexpectedError20: DC.W 'o'
+unexpectedError21: DC.W 'c'
+unexpectedError22: DC.W 'c'
+unexpectedError23: DC.W 'u'
+unexpectedError24: DC.W 'r'
+unexpectedError25: DC.W 'e'
+unexpectedError26: DC.W 'd'
+unexpectedError27: DC.W ' '
+unexpectedError28: DC.W ')'
+unexpectedError29: DC.W ':'
+unexpectedError30: DC.W 0xA
+unexpectedError31: DC.W 0xFF
+
+
+unrecognisedOperator: DC.W 'U'
+unrecognisedOperator1: DC.W 'n'
+unrecognisedOperator2: DC.W 'r'
+unrecognisedOperator3: DC.W 'e'
+unrecognisedOperator4: DC.W 'c'
+unrecognisedOperator5: DC.W 'o'
+unrecognisedOperator6: DC.W 'g'
+unrecognisedOperator7: DC.W 'n'
+unrecognisedOperator8: DC.W 'i'
+unrecognisedOperator9: DC.W 's'
+unrecognisedOperator10: DC.W 'e'
+unrecognisedOperator11: DC.W 'd'
+unrecognisedOperator12: DC.W ' '
+unrecognisedOperator13: DC.W 'o'
+unrecognisedOperator14: DC.W 'p'
+unrecognisedOperator15: DC.W 'e'
+unrecognisedOperator16: DC.W 'r'
+unrecognisedOperator17: DC.W 'a'
+unrecognisedOperator18: DC.W 't'
+unrecognisedOperator19: DC.W 'o'
+unrecognisedOperator20: DC.W 'r'
+unrecognisedOperator21: DC.W '.'
+unrecognisedOperator22: DC.W 0xA
+unrecognisedOperator23: DC.W 0xFF
+
+enterExpressionPrompt: DC.W 'P'
+enterExpressionPrompt1: DC.W 'l'
+enterExpressionPrompt2: DC.W 'e'
+enterExpressionPrompt3: DC.W 'a'
+enterExpressionPrompt4: DC.W 's'
+enterExpressionPrompt5: DC.W 'e'
+enterExpressionPrompt6: DC.W ' '
+enterExpressionPrompt7: DC.W 'e'
+enterExpressionPrompt8: DC.W 'n'
+enterExpressionPrompt9: DC.W 't'
+enterExpressionPrompt10: DC.W 'e'
+enterExpressionPrompt11: DC.W 'r'
+enterExpressionPrompt12: DC.W ' '
+enterExpressionPrompt13: DC.W 'a'
+enterExpressionPrompt14: DC.W 'n'
+enterExpressionPrompt15: DC.W ' '
+enterExpressionPrompt16: DC.W 'e'
+enterExpressionPrompt17: DC.W 'x'
+enterExpressionPrompt18: DC.W 'p'
+enterExpressionPrompt19: DC.W 'r'
+enterExpressionPrompt20: DC.W 'e'
+enterExpressionPrompt21: DC.W 's'
+enterExpressionPrompt22: DC.W 's'
+enterExpressionPrompt23: DC.W 'i'
+enterExpressionPrompt24: DC.W 'o'
+enterExpressionPrompt25: DC.W 'n'
+enterExpressionPrompt26: DC.W ' '
+enterExpressionPrompt27: DC.W 't'
+enterExpressionPrompt28: DC.W 'h'
+enterExpressionPrompt29: DC.W 'e'
+enterExpressionPrompt30: DC.W ' '
+enterExpressionPrompt31: DC.W 'f'
+enterExpressionPrompt32: DC.W 'o'
+enterExpressionPrompt33: DC.W 'r'
+enterExpressionPrompt34: DC.W 'm'
+enterExpressionPrompt35: DC.W 'a'
+enterExpressionPrompt36: DC.W 't'
+enterExpressionPrompt37: DC.W 0xA
+enterExpressionPrompt38: DC.W 'a'
+enterExpressionPrompt39: DC.W '+'
+enterExpressionPrompt40: DC.W 'b'
+enterExpressionPrompt41: DC.W '='
+enterExpressionPrompt62: DC.W 0xA
+enterExpressionPrompt63: DC.W 0xFF
