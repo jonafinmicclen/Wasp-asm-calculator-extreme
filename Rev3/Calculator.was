@@ -1,21 +1,33 @@
-MOV AX, taaa
-MOV BX, 0x5
-CALL AddFragToOtherFragPtrInAXLengthInBX
-MOV AX, taaa
-MOV BX, 0x5
-CALL AddFragToOtherFragPtrInAXLengthInBX
-CALL CopyFragmentedNumber
-MOV AX, [immutableFragCopyStartPointer]
-MOV BX, [immutableFragCopyLength]
-INC BX
-CALL AddFragToOtherFragPtrInAXLengthInBX
-CALL GetFragmentedNumberLengthInMemoryIntoAX
-MOV BX, [immutableFragCopyLength]
+Main:
+CALL ResetFragmentedNumberToZero
+CALL InputNumberToFrag
+
+MOV AX, [operator]
+CMP AX, '+'
+JEQ MainHandleAddition
+
+// error alert, shouldnt reach here
+MOV AX, 0xABCD
+MOV AX, 0xABCD
 HALT
 
+MainHandleAddition:
+MOV AX, 0x200
+CALL CopyFragmentedNumberToAddressInAXEndFlagged
+CALL ResetFragmentedNumberToZero
+CALL InputNumberToFrag
+MOV AX, 0x200
+CALL AddFragAtAXToFrag
+CALL PrintFragmentedNumber
+MOV AX, 0xA
+CALL PrintChar
+JMP Main
 
 
-// Must ensure this function correctly updates the length of freagmenteed nubmer
+
+// If any bugs happen make sure a function using the pointer doesn't call another also using the pointer
+
+// Must ensure this function correctly updates the length of fragmented nubmer, I think it does now that i fixed it ..
 AddAXToFragmentedNumberOffsettPointerBX:
 
 PUSH AX
@@ -53,42 +65,62 @@ CALL IncrementPointerBX
 CMP AX, 0x0
 JNE AddAXToFragmentedNumberLoop
 
+// Check if pointer is more than end first
 MOV AX, [fragmentedSignificandPointer]
+DEC AX
+MOV BX, [significandEndVariable]
+CMP AX, BX
+JL DontUpdateEndVar
 MOV [significandEndVariable], AX
+DontUpdateEndVar:
 
 RET
 
 
 
+// This entire function is trash
 MulFragmentedNumberByTen:
 
-CALL ResetSignificandPointerToStart
-MOV BX, 0x0
-PUSH BX
+// Initialise iterations counter
+MOV AX, 0x0
+MOV [MulFragmentedNumberByTenIterations], AX
+
+// Copy the number to multiply segments by ten
+CALL CopyFragmentedNumber
+// Reset number to 0 to add products into
+CALL ResetFragmentedNumberToZero
+
+
+// Find start and end address of fragmented number
+MOV AX, [immutableFragCopyStartPointer]
+MOV BX, [immutableFragCopyLength]
+ADD BX, AX
+// AX Contains pointer to start BX contains pointer to end
 
 MulFragmentedNumberByTenLoop:
 
-MOV AX, [fragmentedSignificandPointer]
+// Save pointer and end address
+PUSH AX
+PUSH BX
+
 MOV AX, [AX]
 MUL AX, 0xA
+MOV BX, [MulFragmentedNumberByTenIterations]
+CALL AddAXToFragmentedNumberOffsettPointerBX
+
+// Increase counter
+MOV AX, [MulFragmentedNumberByTenIterations]
+INC AX
+MOV [MulFragmentedNumberByTenIterations], AX
+
+// Get Pointer and end address
 POP BX
-ADD AX, BX
-
-CALL SplitAX
-PUSH AX
-
-MOV AX, [fragmentedSignificandPointer]
-MOV [AX], BX
-
-CALL IncrementPointerBX
-
-MOV AX, [fragmentedSignificandPointer]
-MOV BX, [significandEndVariable]
-INC BX
-CMP AX, BX
-JL MulFragmentedNumberByTenLoop
-MOV [significandEndVariable], AX
 POP AX
+// Increment Pointer and continue if not out of bounds
+INC AX
+CMP BX, AX
+JGE MulFragmentedNumberByTenLoop
+
 RET
 
 
@@ -175,7 +207,7 @@ RET
 CopyFragmentedNumber:
 
 CALL ResetSignificandPointerToStart
-CALL GetFragmentedNumberLengthInMemoryIntoAX
+CALL GetFragmentedNumberLengthInMemoryIntoBX
 MOV [immutableFragCopyLength], BX
 MOV BX, [fragmentedSignificandPointer]
 SUB BX, AX
@@ -198,7 +230,7 @@ CMP AX, BX
 JL CopyFragmentedNumberLoop
 
 PUSH AX
-Call GetFragmentedNumberLengthInMemoryIntoAX
+Call GetFragmentedNumberLengthInMemoryIntoBX
 POP BX
 SUB BX, AX
 DEC BX
@@ -206,8 +238,103 @@ DEC BX
 RET
 
 
+// Use variable to access location of copied number, COPPIED NUMBER IS IMMUTABLE
+CopyFragmentedNumberToAddressInAXEndFlagged:
 
-GetFragmentedNumberLengthInMemoryIntoAX:
+PUSH AX
+CALL ResetSignificandPointerToStart
+CALL GetFragmentedNumberLengthInMemoryIntoBX
+POP AX
+ADD BX, AX
+
+CopyFragmentedNumberToAddressInAXEndFlaggedLoop:
+PUSH BX
+PUSH AX
+
+MOV BX, [fragmentedSignificandPointer]
+MOV BX, [BX]
+MOV [AX], BX
+
+CALL IncrementPointerBX
+CALL GetFragmentedNumberLengthInMemoryIntoBX
+POP AX
+POP BX
+INC AX
+
+CMP BX, AX
+JGE CopyFragmentedNumberToAddressInAXEndFlaggedLoop
+
+// End flag is abcd
+MOV [AX], 0xABCD
+
+RET
+
+
+
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+
+
+GetFragmentedNumberLengthInMemoryIntoBX:
 
 MOV AX, [significandStartConstant]
 MOV BX, [significandEndVariable]
@@ -248,6 +375,7 @@ RET
 
 
 
+
 SplitAX:
 
 MOV BX, AX
@@ -272,14 +400,264 @@ POP BX
 // Result, AX contains 0x**00 >> 8, BX contains 0x00** 
 RET
 
+
+
+// Reads next char, ignores enter
+ReadNext:
+
+// Wait for ready flag
+MOV AX, [0x00F5]
+CMP AX, 0x0
+JEQ ReadNext
+
+// Read char
+MOV AX, [0x00F3]
+
+// Switch ready flag
+MOV BX, 0x00F5
+MOV [BX], 0x0
+
+MOV BX, AX
+
+// Ensure character is not enter
+CMP BX, 0xA
+JEQ ReadNext
+
+// Check if last two characters are xx
+CMP BX, 'x'
+JNE NotX
+// IF X
+
+// Halt IF LastCharX
+MOV BX, [lastCharX]
+CMP BX, 0x1
+JNE NotLastCharX
+HALT
+NotLastCharX:
+
+// Update LastCharX flag
+MOV BX, 0x1
+MOV [lastCharX], BX
+
+RET
+
+// ELSE reset lastCharX flag then return
+NotX:
+MOV BX, 0x0
+MOV [lastCharX], BX
+
+RET
+
+
+
+InputNumberToFrag:
+
+CALL ReadNext
+// Push for end condition functions modifiying ax
+PUSH AX
+
+// End condition
+CALL IsAXNumeric
+CMP AX, 0x0
+JEQ IfNotNumeric
+
+// Add digit to frag
+POP AX
+SUB AX, '0'
+CALL PushDigitInAXIntoFrag
+
+JMP InputNumberToFrag
+
+IfNotNumeric:
+POP AX
+
+// Store potential operator for later
+MOV [operator], AX
+
+// Check its an operator
+CMP AX, '+'
+JEQ Return
+CMP AX, '='
+JEQ Return
+
+// Add 'this operator not recognised' error message here
+// Debug message abcd
+MOV AX, 0xABCD
+MOV BX, 0xABCD
+HALT
+RET
+
+
+
+// Input in AX bool return in AX
+IsAXNumeric:
+
+CMP AX, '0'
+JGE MoreThanOrEqualToZero
+MOV AX, 0x0
+RET
+MoreThanOrEqualToZero:
+
+MOV BX, '9'
+CMP BX, AX
+JGE LessThanOrEqualToNine
+MOV AX, 0x0
+RET
+LessThanOrEqualToNine:
+
+MOV AX, 0x1
+
+RET
+
+
+PushDigitInAXIntoFrag:
+PUSH AX
+CALL MulFragmentedNumberByTen
+POP AX
+MOV BX, 0x0
+CALL AddAXToFragmentedNumberOffsettPointerBX
+RET
+
+
 Return:
 RET
+
+ResetFragmentedNumberToZero:
+
+MOV AX, [significandStartConstant]
+MOV BX, [significandEndVariable]
+
+ResetFragmentedNumberToZeroLoop:
+
+MOV [AX], 0x0
+INC AX
+CMP BX, AX
+JGE ResetFragmentedNumberToZeroLoop
+
+MOV BX, [significandStartConstant]
+MOV AX, significandEndVariable
+MOV [AX], BX
+
+RET
+
+
+
+PrintChar:
+MOV [0xF0], AX
+MOV AX, 0x0001
+MOV [0xF2], AX
+PrintCharLoop:
+MOV AX, [0x00F2]
+CMP AX, 0x1
+JEQ PrintCharLoop
+RET
+
+
+// Kinda gross use of stack but its perfect
+PrintFragmentedNumber:
+
+// This is end flag for printing number
+MOV AX, 0xABCD
+PUSH AX
+
+PrintFragmentedNumberLoopFirst:
+
+// Div frag by ten and push Remainder
+CALL DivFragmentedNumberByTenRemInAX
+ADD AX, '0'
+PUSH AX
+
+// Increment and end condition
+CALL IsFragmentedNumberZero
+CMP AX, 0x1
+JNE PrintFragmentedNumberLoopFirst
+
+MOV BX, 0xABCD
+
+PrintFragmentedNumberLoopSecond:
+
+POP AX
+
+CMP AX, BX
+JEQ Return
+
+PUSH AX
+CALL PrintChar
+POP AX
+
+JMP PrintFragmentedNumberLoopSecond
+
+
+
+IsFragmentedNumberZero:
+
+CALL ResetSignificandPointerToStart
+
+IsFragmentedNumberZeroLoop:
+
+MOV BX, [fragmentedSignificandPointer]
+MOV AX, [BX]
+CMP AX, 0x0
+JNE NotZero
+
+CALL IncrementPointerBX
+MOV AX, [fragmentedSignificandPointer]
+MOV BX, [significandEndVariable]
+CMP BX, AX
+JGE IsFragmentedNumberZeroLoop
+
+MOV AX, 0x1
+RET
+
+NotZero:
+MOV AX, 0x0
+RET
+
+
+
+AddFragAtAXToFrag:
+
+// Ax contains start of frag to add from, end of this frag is indicated by abcd
+// BX will be iteration counter
+MOV BX, 0x0
+
+AddFragAtAXToFragLoop:
+
+PUSH AX
+PUSH BX
+
+MOV AX, [AX]
+MOV BX, 0xABCD
+CMP AX, BX
+JEQ AddFragAtAXToFragLoopEnd
+
+POP BX
+PUSH BX
+
+CALL AddAXToFragmentedNumberOffsettPointerBX
+
+POP BX
+POP AX
+
+INC AX
+INC BX
+
+JMP AddFragAtAXToFragLoop
+
+AddFragAtAXToFragLoopEnd:
+
+//Cleanup stack
+POP AX
+POP BX
+
+RET
+
 
 
 
 fragmentedSignificandPointer: DC.W 0x0
 significandStartConstant: DC.W 0x1000
-significandEndVariable: DC.W 0x0
+significandEndVariable: DC.W 0x1000
 exponentOfFragmentedTwosCompliment: DC.W 0x0
 signOfFragmented: DC.W 0x0
 
@@ -287,6 +665,11 @@ immutableFragCopyStartPointer: DC.W 0x0
 immutableFragCopyLength: DC.W 0x0
 
 TempAddFragToOtherFragPtrInBXLengthInAXIteration: DC.W 0x0
+MulFragmentedNumberByTenIterations: DC.W 0x0
+
+lastCharX: DC.W 0x0
+
+operator: DC.W 0x0
 
 taaa: DC.W 0xFF
 tana: DC.W 0xFF
