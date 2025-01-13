@@ -49,14 +49,20 @@ CALL InputNumberToFrag
 
 // If AX more use first handler otherwise use the other one
 CALL GetFragmentedNumberLengthInMemoryIntoBX
+POP AX
 CMP BX, AX
-JL MainHandleSubtractionAXGreaterCase
+JNE MainHandleSubtractionUnequalLengths
 
+// Equal length handling
 MOV AX, 0x400
 CALL CmpLoadedFragToFragAtAXGreaterThan
 CMP AX, 0x0
 JEQ MainHandleSubtractionAXGreaterCase
 JMP MainHandleSubtractionBXGreaterCase
+
+MainHandleSubtractionUnequalLengths:
+CMP AX, BX
+JL MainHandleSubtractionBXGreaterCase
 
 
 MainHandleSubtractionAXGreaterCase:
@@ -93,7 +99,6 @@ MOV AX, 0xA
 CALL PrintChar
 
 JMP Main
-
 
 
 MainHandleMultiplication:
@@ -885,9 +890,87 @@ RET
 
 // Return 1 in ax if Loaded > frag at ax
 CmpLoadedFragToFragAtAXGreaterThan:
+
+MOV BX, 0xABCD
+PUSH BX
+
+MOV [CmpLoadedFragToFragAtAXGreaterThanTempVar], AX
+
+// Loads the temp number into stack so can be read in reverse
+CmpLoadedFragToFragAtAXGreaterThanStackLoop:
+
+MOV AX, [CmpLoadedFragToFragAtAXGreaterThanTempVar]
+
+MOV BX, [AX]
+PUSH BX
+INC AX
+
+MOV [CmpLoadedFragToFragAtAXGreaterThanTempVar], AX
+
+// Continue loop if flag not met
+MOV AX, 0xABCD
+CMP BX, AX
+JNE CmpLoadedFragToFragAtAXGreaterThanStackLoop
+
+POP BX
+// return 1 if loaded is bigger
+
+CALL ResetSignificandPointerToEnd
+
+CmpLoadedFragToFragAtAXGreaterThanComparisonLoop:
+
+POP AX
+MOV BX, [fragmentedSignificandPointer]
+MOV BX, [BX]
+
+MOV [CmpLoadedFragToFragAtAXGreaterThanTempVar], BX
+MOV BX, 0xABCD
+CMP AX, BX
+JEQ CmpLoadedFragToFragAtAXGreaterThanComparisonTrueEqual
+MOV BX, [CmpLoadedFragToFragAtAXGreaterThanTempVar]
+
+
+CMP BX, AX
+JGE BXBiggerOrEqual
+
+// AX less than BX
+MOV AX, 0x0
+MOV [CmpLoadedFragToFragAtAXGreaterThanTempVar], AX
+JMP CleanupAndReturn
+
+BXBiggerOrEqual:
+
+CMP AX, BX
+JNE BXBigger
+
+JMP Continue
+
+BXBigger:
+
+MOV AX, 0x1
+MOV [CmpLoadedFragToFragAtAXGreaterThanTempVar], AX
+JMP CleanupAndReturn
+
+Continue:
+
+CALL DecrementPointerBX
+JMP CmpLoadedFragToFragAtAXGreaterThanComparisonLoop
+
+CmpLoadedFragToFragAtAXGreaterThanComparisonTrueEqual:
+MOV AX, 0x0
+RET
+
+CleanupAndReturn:
+POP BX
+MOV AX, 0xABCD
+CMP AX, BX
+JNE CleanupAndReturn
+MOV AX, [CmpLoadedFragToFragAtAXGreaterThanTempVar]
 RET
 
 
+
+CmpLoadedFragToFragAtAXGreaterThanTempVar: DC.W 0x0
 
 fragmentedSignificandPointer: DC.W 0x0
 significandStartConstant: DC.W 0x1000
