@@ -19,6 +19,8 @@ MOV BX, unexpectedError
 CALL PrintTextFromMemory
 HALT
 
+
+
 MainHandleAddition:
 MOV AX, 0x400
 CALL CopyFragmentedNumberToAddressInAXEndFlagged
@@ -26,22 +28,75 @@ CALL ResetFragmentedNumberToZero
 CALL InputNumberToFrag
 MOV AX, 0x400
 CALL AddFragAtAXToFrag
-CALL PrintFragmentedNumber
+CALL PrintFragmentedNumber 
 MOV AX, 0xA
 CALL PrintChar
 JMP Main
 
+
+
 MainHandleSubtraction:
+
+CALL GetFragmentedNumberLengthInMemoryIntoBX
+PUSH BX
+
 MOV AX, 0x400
 CALL CopyFragmentedNumberToAddressInAXEndFlagged
+
 CALL ResetFragmentedNumberToZero
+
 CALL InputNumberToFrag
+
+// If AX more use first handler otherwise use the other one
+CALL GetFragmentedNumberLengthInMemoryIntoBX
+CMP BX, AX
+JL MainHandleSubtractionAXGreaterCase
+
 MOV AX, 0x400
+CALL CmpLoadedFragToFragAtAXGreaterThan
+CMP AX, 0x0
+JEQ MainHandleSubtractionAXGreaterCase
+JMP MainHandleSubtractionBXGreaterCase
+
+
+MainHandleSubtractionAXGreaterCase:
+
+MOV AX, 0x500
+CALL CopyFragmentedNumberToAddressInAXEndFlagged
+
+MOV AX, 0x400
+CALL LoadFragAtAX
+
+MOV AX, 0x500
 CALL SubFragAtAXToFrag
+
 CALL PrintFragmentedNumber
+
 MOV AX, 0xA
 CALL PrintChar
+
 JMP Main
+
+
+MainHandleSubtractionBXGreaterCase:
+
+MOV AX, 0x400
+CALL SubFragAtAXToFrag
+
+// Print negative sign
+MOV AX, 0x2D
+CALL PrintChar
+
+CALL PrintFragmentedNumber
+
+MOV AX, 0xA
+CALL PrintChar
+
+JMP Main
+
+
+
+MainHandleMultiplication:
 
 
 
@@ -223,6 +278,73 @@ RET
 
 
 
+
+
+
+
+
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+
 // Use variable to access location of copied number, COPPIED NUMBER IS IMMUTABLE
 CopyFragmentedNumber:
 
@@ -288,71 +410,6 @@ JGE CopyFragmentedNumberToAddressInAXEndFlaggedLoop
 MOV [AX], 0xABCD
 
 RET
-
-
-
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-
 
 GetFragmentedNumberLengthInMemoryIntoBX:
 
@@ -456,6 +513,7 @@ JNE NotX
 
 // Halt IF LastCharX
 MOV BX, [lastCharX]
+JMP ReadNext
 CMP BX, 0x1
 JNE NotLastCharX
 HALT
@@ -551,6 +609,11 @@ RET
 
 ResetFragmentedNumberToZero:
 
+// Reset Sign
+MOV AX, 0x0
+MOV [signOfFragmented], AX
+
+// Reset signifcand
 MOV AX, [significandStartConstant]
 MOV BX, [significandEndVariable]
 
@@ -728,11 +791,101 @@ POP BX
 INC BX
 JMP PrintTextFromMemory
 
-AddAXToFragmentedNumberOffsettPointerBX:
-MOV BX, unrecognisedOperator
-CALL PrintTextFromMemory
-JMP Main
-// need to finish this function for subtraction
+
+
+// Only can input half a word, assumes that BX < AX
+
+SubAXToFragmentedNumberOffsettPointerBX:
+
+PUSH AX
+PUSH BX
+CALL ResetSignificandPointerToStart
+MOV AX, [fragmentedSignificandPointer]
+POP BX 
+ADD AX, BX
+MOV [fragmentedSignificandPointer], AX
+POP BX
+
+SubAXToFragmentedNumberOffsettPointerBXLoop:
+
+// Get num at pointer
+MOV AX, [fragmentedSignificandPointer]
+MOV AX, [AX]
+
+// IF result will be positive
+CMP AX, BX
+JL SubAXToFragmentedNumberOffsettPointerBNotGreaterOrEqualAXBX
+
+// Result of subtraction is positive so do it replace and return
+SUB AX, BX
+MOV BX, [fragmentedSignificandPointer]
+MOV [BX], AX
+RET
+
+// IF result would be negative
+SubAXToFragmentedNumberOffsettPointerBNotGreaterOrEqualAXBX:
+
+// Result will be negative so take from next digit, by setting BX to 1 and adding 100 to subtraction result
+ADD AX, 0x80
+ADD AX, 0x80
+SUB AX, BX
+MOV BX, [fragmentedSignificandPointer]
+MOV [BX], AX
+
+CALL IncrementPointerBX
+MOV BX, 0x1
+
+JMP SubAXToFragmentedNumberOffsettPointerBXLoop
+
+
+
+MulFragmentByOtherFragmentStartingAtAX:
+
+RET
+
+
+
+// Stopping at stop flag 0xABCD will inpute the saved frag into the currently loaded one
+LoadFragAtAX:
+
+PUSH AX
+CALL ResetSignificandPointerToStart
+POP AX
+
+LoadFragAtAXLoop:
+
+PUSH AX
+MOV AX, [AX]
+
+MOV BX, 0xABCD
+CMP AX, BX
+JEQ LoadFragAtAXLoopExit
+
+// Get num from copied frag and move it into the loaded frag
+MOV BX, [fragmentedSignificandPointer]
+MOV [BX], AX
+POP AX
+
+INC AX
+CALL IncrementPointerBX
+
+JMP LoadFragAtAXLoop
+
+LoadFragAtAXLoopExit:
+
+POP AX
+
+// Update end of fragged number
+MOV AX, [fragmentedSignificandPointer]
+MOV [significandEndVariable], AX
+
+RET
+
+
+
+// Return 1 in ax if Loaded > frag at ax
+CmpLoadedFragToFragAtAXGreaterThan:
+RET
 
 
 
