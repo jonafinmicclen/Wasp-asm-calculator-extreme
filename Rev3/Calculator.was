@@ -121,8 +121,9 @@ MOV AX, 0x400
 MOV BX, 0x600
 CALL MultiplyFragAtAXByFragAtBXResultIntoLoadedFrag
 
-HALT
-// Not yet done
+CALL PrintFragmentedNumber
+
+JMP Main
 
 
 // If any bugs happen make sure a function using the pointer doesn't call another also using the pointer
@@ -579,20 +580,7 @@ POP AX
 
 // Store potential operator for later
 MOV [operator], AX
-
-// Check its an operator
-CMP AX, '+'
-JEQ Return
-CMP AX, '-'
-JEQ Return
-CMP AX, '='
-JEQ Return
-
-// Unrecognised operator
-MOV BX, unrecognisedOperator
-CALL PrintTextFromMemory
-// Restart due to error
-JMP Main
+RET
 
 
 
@@ -979,12 +967,12 @@ JNE CleanupAndReturn
 MOV AX, [CmpLoadedFragToFragAtAXGreaterThanTempVar]
 RET
 
-MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffset: DC.W 0x0
-MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffsetBX: DC.W 0x0
 
 
 // Both are end flagged
 MultiplyFragAtAXByFragAtBXResultIntoLoadedFrag:
+
+MOV [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffsetAXStartStore], AX
 
 PUSH AX
 MOV AX, 0x0
@@ -998,10 +986,12 @@ MultiplyFragAtAXByFragAtBXResultIntoLoadedFragLoopBX:
 PUSH BX
 
 MultiplyFragAtAXByFragAtBXResultIntoLoadedFragLoopAX:
+
+// Store two pointers
 PUSH AX
 PUSH BX
 
-// Check end flag not met for AX
+// Check end flag not met for val at AX
 MOV AX, [AX]
 MOV BX, 0xABCD
 CMP AX, BX
@@ -1026,17 +1016,19 @@ MOV AX, [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffset]
 INC AX
 MOV [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffset], AX
 
+// Get two pointers and incremet only ax
 POP BX
 POP AX
 INC AX
-JMP MultiplyFragAtAXByFragAtBXResultIntoLoadedFragLoopAX:
+
+JMP MultiplyFragAtAXByFragAtBXResultIntoLoadedFragLoopAX
 MultiplyFragAtAXByFragAtBXResultIntoLoadedFragLoopAXBreak:
+
 POP BX
 POP AX
-PUSH BX
-MOV BX, [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffset]
-SUB AX, BX
-POP BX
+
+// Reset AX pointer
+MOV AX, [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffsetAXStartStore]
 
 // Reset and increment offset
 PUSH AX
@@ -1045,6 +1037,7 @@ INC AX
 MOV [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffsetBX], AX
 MOV [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffset], AX
 POP AX
+
 // Get pointer to BX frag increment and continue loop
 POP BX
 INC BX
@@ -1063,13 +1056,14 @@ MultiplyFragAtAXByFragAtBXResultIntoLoadedFragLoopBXBreak:
 
 POP AX
 POP BX
-HALT
-
 
 RET
 
 
 
+MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffset: DC.W 0x0
+MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffsetBX: DC.W 0x0
+MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffsetAXStartStore: DC.W 0x0
 
 MulFragmentedNumberByBXOperand: DC.W 0x0
 CmpLoadedFragToFragAtAXGreaterThanTempVar: DC.W 0x0
