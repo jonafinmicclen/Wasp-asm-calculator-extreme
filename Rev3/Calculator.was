@@ -9,12 +9,16 @@ CALL PrintTextFromMemory
 // Take inputs
 CALL InputNumberToFrag
 
+// Do correct subroutine for operator
 MOV AX, [operator]
 CMP AX, '+'
 JEQ MainHandleAddition
 CMP AX, '-'
 JEQ MainHandleSubtraction
+CMP AX, '*'
+JEQ MainHandleMultiplication
 
+// Code shouldnt get here
 MOV BX, unexpectedError
 CALL PrintTextFromMemory
 HALT
@@ -44,7 +48,6 @@ MOV AX, 0x400
 CALL CopyFragmentedNumberToAddressInAXEndFlagged
 
 CALL ResetFragmentedNumberToZero
-
 CALL InputNumberToFrag
 
 // If AX more use first handler otherwise use the other one
@@ -103,6 +106,23 @@ JMP Main
 
 MainHandleMultiplication:
 
+MOV AX, 0x400
+CALL CopyFragmentedNumberToAddressInAXEndFlagged
+
+CALL ResetFragmentedNumberToZero
+CALL InputNumberToFrag
+
+MOV AX, 0x600
+CALL CopyFragmentedNumberToAddressInAXEndFlagged
+
+CALL ResetFragmentedNumberToZero
+
+MOV AX, 0x400
+MOV BX, 0x600
+CALL MultiplyFragAtAXByFragAtBXResultIntoLoadedFrag
+
+HALT
+// Not yet done
 
 
 // If any bugs happen make sure a function using the pointer doesn't call another also using the pointer
@@ -241,6 +261,72 @@ RET
 
 
 
+
+
+
+
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+
 // Untested takes pointer to start of a fragmented number and adds it to the currently loaded fragmented number
 AddFragToOtherFragPtrInAXLengthInBX:
 
@@ -280,75 +366,6 @@ CMP AX, BX
 JL AddFragToOtherFragPtrInAXLengthInBXLoop
 
 RET
-
-
-
-
-
-
-
-
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
 
 // Use variable to access location of copied number, COPPIED NUMBER IS IMMUTABLE
 CopyFragmentedNumber:
@@ -844,12 +861,6 @@ JMP SubAXToFragmentedNumberOffsettPointerBXLoop
 
 
 
-MulFragmentByOtherFragmentStartingAtAX:
-
-RET
-
-
-
 // Stopping at stop flag 0xABCD will inpute the saved frag into the currently loaded one
 LoadFragAtAX:
 
@@ -968,8 +979,99 @@ JNE CleanupAndReturn
 MOV AX, [CmpLoadedFragToFragAtAXGreaterThanTempVar]
 RET
 
+MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffset: DC.W 0x0
+MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffsetBX: DC.W 0x0
 
 
+// Both are end flagged
+MultiplyFragAtAXByFragAtBXResultIntoLoadedFrag:
+
+PUSH AX
+MOV AX, 0x0
+MOV [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffset], AX
+MOV AX, 0x0
+MOV [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffsetBX], AX
+POP AX
+
+MultiplyFragAtAXByFragAtBXResultIntoLoadedFragLoopBX:
+// Store pointer to BX frag
+PUSH BX
+
+MultiplyFragAtAXByFragAtBXResultIntoLoadedFragLoopAX:
+PUSH AX
+PUSH BX
+
+// Check end flag not met for AX
+MOV AX, [AX]
+MOV BX, 0xABCD
+CMP AX, BX
+JEQ MultiplyFragAtAXByFragAtBXResultIntoLoadedFragLoopAXBreak
+
+POP BX
+POP AX
+PUSH AX
+PUSH BX
+
+// Get two partials
+MOV BX, [BX]
+MOV AX, [AX]
+
+// Calculate product and add into number
+MUL AX, BX
+MOV BX, [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffset]
+CALL AddAXToFragmentedNumberOffsettPointerBX
+
+// Increment offset in ax loop
+MOV AX, [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffset]
+INC AX
+MOV [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffset], AX
+
+POP BX
+POP AX
+INC AX
+JMP MultiplyFragAtAXByFragAtBXResultIntoLoadedFragLoopAX:
+MultiplyFragAtAXByFragAtBXResultIntoLoadedFragLoopAXBreak:
+POP BX
+POP AX
+PUSH BX
+MOV BX, [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffset]
+SUB AX, BX
+POP BX
+
+// Reset and increment offset
+PUSH AX
+MOV AX, [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffsetBX]
+INC AX
+MOV [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffsetBX], AX
+MOV [MultiplyFragAtAXByFragAtBXResultIntoLoadedFragOffset], AX
+POP AX
+// Get pointer to BX frag increment and continue loop
+POP BX
+INC BX
+
+PUSH BX
+PUSH AX
+MOV BX, [BX]
+MOV AX, 0xABCD
+CMP AX, BX
+JEQ MultiplyFragAtAXByFragAtBXResultIntoLoadedFragLoopBXBreak
+POP AX
+POP BX
+
+JMP MultiplyFragAtAXByFragAtBXResultIntoLoadedFragLoopBX
+MultiplyFragAtAXByFragAtBXResultIntoLoadedFragLoopBXBreak:
+
+POP AX
+POP BX
+HALT
+
+
+RET
+
+
+
+
+MulFragmentedNumberByBXOperand: DC.W 0x0
 CmpLoadedFragToFragAtAXGreaterThanTempVar: DC.W 0x0
 
 fragmentedSignificandPointer: DC.W 0x0
